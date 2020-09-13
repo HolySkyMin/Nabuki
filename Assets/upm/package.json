@@ -1,0 +1,15 @@
+{
+    "name": "com.holyskymin.nabuki",
+    "displayName": "Nabuki",
+    "version": "0.1.0-preview",
+    "unity": "2019.1",
+    "description": "Dialogue library for Unity.\n\nRequires .NET 4.x scripting runtime and API compatibility level.",
+    "dependencies":
+    {
+        "com.unity.textmeshpro": "2.0.1"
+    },
+    "author": 
+    {
+        "name": "HolySkyMin"
+    }
+}
