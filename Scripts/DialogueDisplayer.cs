@@ -22,6 +22,8 @@ namespace Nabuki
             nameText.SetText(talker);
             bodyText.SetText(text);
 
+            var dt = System.DateTime.Now;
+            //Debug.Log("Received text...");
             if(animateText)
             {
                 unskipIndicator.SetActive(unskippable);
@@ -31,7 +33,9 @@ namespace Nabuki
                 float clock = 0f, spc = 1f / cps;
 
                 bodyText.maxVisibleCharacters = 0;
-                while(i < bodyText.textInfo.characterCount)
+                yield return null;
+                //Debug.Log("Updated text info. Time consumed: " + (System.DateTime.Now - dt).TotalSeconds);
+                while (i < bodyText.textInfo.characterCount)
                 {
                     var next = Mathf.FloorToInt(clock / spc);
                     if (next > i)

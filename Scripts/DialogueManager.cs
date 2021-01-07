@@ -26,16 +26,14 @@ namespace Nabuki
         [HideInInspector] public int phase, dialogueIndex;
         [HideInInspector] public NbkData data;
         [HideInInspector] public Dictionary<string, DialogueCharacter> characters;
+        [HideInInspector] public Dictionary<string, System.Action> externalAction;
+        [HideInInspector] public Dictionary<string, System.Func<NbkTokenizer, IDialogue>> customSyntax;
 
         public static NbkVariable GetVariable(string key) => Now.data.GetVariable(key);
 
-        public static dynamic GetVariableValue(string key) => Now.data.GetVariableValue(key);
-
-        public static T GetVariableValue<T>(string key) => Now.data.GetVariableValue<T>(key);
-
         public static void SetVariable(string key, dynamic value) => Now.data.SetVariable(key, value);
 
-        public static void CreateVariable(string key, NbkVariableType type, dynamic value) => Now.data.CreateVariable(key, type, value);
+        public static void CreateVariable(string key, dynamic value) => Now.data.CreateVariable(key, value);
 
         private void Awake()
         {
@@ -49,6 +47,8 @@ namespace Nabuki
 
             // Initialize
             characters = new Dictionary<string, DialogueCharacter>();
+            externalAction = new Dictionary<string, System.Action>();
+            customSyntax = new Dictionary<string, System.Func<NbkTokenizer, IDialogue>>();
 
             // Data load
             data = new NbkData() { variables = new Dictionary<string, NbkVariable>() };
@@ -67,7 +67,8 @@ namespace Nabuki
             {
                 var newCharacter = Instantiate(characterTemplate);
                 newCharacter.Set(key, cname, characterField[fieldIndex]);
-                //newCharacter.gameObject.SetActive(true);
+                newCharacter.name = "Character: " + key;
+                newCharacter.gameObject.SetActive(true);
                 characters.Add(key, newCharacter);
             }
         }

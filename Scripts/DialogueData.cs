@@ -21,6 +21,7 @@ namespace Nabuki
         public int displayIndex;
         public int cps;
         public bool unstoppable;
+        public bool hideName;
 
         public IEnumerator Run(DialogueManager dialog)
         {
@@ -38,6 +39,8 @@ namespace Nabuki
                     var registered = dialog.FindCharacterName(talker, out realTalker);
                     if (!registered)
                         realTalker = talker;
+                    if (hideName)
+                        realTalker = "???";
                     break;
             }
 
@@ -54,7 +57,7 @@ namespace Nabuki
                         var charaRegistered = dialog.FindCharacterName(keyword, out valueword);
                         if(!charaRegistered)
                         {
-                            try { valueword = dialog.data.GetVariable(keyword).GetValue().ToString(); }
+                            try { valueword = dialog.data.GetVariable(keyword).value; }
                             catch { valueword = keyword; }
                         }
                         break;
@@ -75,14 +78,15 @@ namespace Nabuki
         public Dictionary<int, string> select;
         public bool storeInVariable;
         public string variableKey;
+        public bool dontChangePhase;
 
         public IEnumerator Run(DialogueManager dialog)
         {
             yield return dialog.selector.ShowSelect(select, result =>
             {
                 if (storeInVariable)
-                    dialog.data.SetVariable(variableKey, result);
-                else
+                    dialog.data.SetVariable(variableKey, result.ToString());
+                if (!dontChangePhase)
                 {
                     dialog.phase = result;
                     dialog.dialogueIndex = -1;
@@ -138,7 +142,8 @@ namespace Nabuki
                     break;
                 case 1: // setsprite
                     var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
-                    dialog.characters[characterKey].image.sprite = DialogueManager.Source.GetSprite(fileName);
+                    var sprite = DialogueManager.Source.GetSprite(fileName);
+                    dialog.characters[characterKey].image.sprite = sprite == null ? dialog.characters[characterKey].defaultSprite : sprite;
                     break;
                 case 2: // setpos
                     dialog.characters[characterKey].SetPosition(position);
@@ -159,25 +164,31 @@ namespace Nabuki
                             break;
                     }
                     break;
-                case 10: // charmove - animation index starts with 10
+                case 5:  // show
+                    dialog.characters[characterKey].Show();
+                    break;
+                case 6:  // hide
+                    dialog.characters[characterKey].Hide();
+                    break;
+                case 10: // move - animation index starts with 10
                     if (shouldWait)
                         yield return dialog.characters[characterKey].Move(position, duration);
                     else
                         dialog.StartCoroutine(dialog.characters[characterKey].Move(position, duration));
                     break;
-                case 11: // charscale
+                case 11: // scale
                     if (shouldWait)
                         yield return dialog.characters[characterKey].Scale(scale, duration);
                     else
                         dialog.StartCoroutine(dialog.characters[characterKey].Scale(scale, duration));
                     break;
-                case 12: // charfadein
+                case 12: // fadein
                     if (shouldWait)
                         yield return dialog.characters[characterKey].FadeIn(duration);
                     else
                         dialog.StartCoroutine(dialog.characters[characterKey].FadeIn(duration));
                     break;
-                case 13: // charfadeout
+                case 13: // fadeout
                     if (shouldWait)
                         yield return dialog.characters[characterKey].FadeOut(duration);
                     else
@@ -195,6 +206,18 @@ namespace Nabuki
                     else
                         dialog.StartCoroutine(dialog.characters[characterKey].NodDown());
                     break;
+                case 16: // blackout
+                    if (shouldWait)
+                        yield return dialog.characters[characterKey].Blackout(duration);
+                    else
+                        dialog.StartCoroutine(dialog.characters[characterKey].Blackout(duration));
+                    break;
+                case 17:  // colorize
+                    if (shouldWait)
+                        yield return dialog.characters[characterKey].Colorize(duration);
+                    else
+                        dialog.StartCoroutine(dialog.characters[characterKey].Colorize(duration));
+                    break;
             }
             yield break;
         }
@@ -207,30 +230,16 @@ namespace Nabuki
         public string musicKey;
         public string variableKey;
         public NbkVariableType variableType;
-        public dynamic value;
+        public string value;
 
         public IEnumerator Run(DialogueManager dialog)
         {
             switch(type)
             {
                 case 0: // define variables
-                    dialog.data.CreateVariable(variableKey, variableType, value);
+                    dialog.data.CreateVariable(variableKey, value);
                     yield break;
                 case 1: // change variable value
-                    var vt = dialog.data.GetVariable(variableKey).GetNbkType();
-                    switch (vt)
-                    {
-                        case NbkVariableType.Int:
-                            value = int.Parse(value);
-                            break;
-                        case NbkVariableType.Bool:
-                            value = bool.Parse(value);
-                            break;
-                        case NbkVariableType.Float:
-                            value = float.Parse(value);
-                            break;
-                    }
-
                     dialog.data.SetVariable(variableKey, value);
                     yield break;
                 case 2: // set next phase
@@ -244,6 +253,22 @@ namespace Nabuki
                     dialog.audio.PlaySE(musicKey);
                     yield break;
             }
+        }
+    }
+
+    public class DialogueDataList : IDialogue
+    {
+        public List<IDialogue> list;
+
+        public DialogueDataList()
+        {
+            list = new List<IDialogue>();
+        }
+
+        public IEnumerator Run(DialogueManager dialog)
+        {
+            foreach (var dialogue in list)
+                yield return dialogue.Run(dialog);
         }
     }
 }

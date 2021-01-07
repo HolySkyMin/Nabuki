@@ -6,10 +6,24 @@ namespace Nabuki
     [Serializable]
     public class NbkVariable
     {
-        public string key;
+        public readonly string key;
+        public string value;
+        public readonly NbkVariableType type;
 
-        NbkVariableType type;
-        dynamic value;
+        public NbkVariable(string k, string v)
+        {
+            key = k;
+            value = v;
+
+            if (IsInt())
+                type = NbkVariableType.Int;
+            else if (IsFloat())
+                type = NbkVariableType.Float;
+            else if (IsBool())
+                type = NbkVariableType.Bool;
+            else
+                type = NbkVariableType.String;
+        }
 
         #region Operators
 
@@ -18,7 +32,14 @@ namespace Nabuki
             if (left.type != right.type)
                 throw new NbkTypeCompareException(left.type, right.type);
 
-            return left.GetValue() == right.GetValue();
+            if (left.type == NbkVariableType.Int)
+                return left.ToInt() == right.ToInt();
+            else if (left.type == NbkVariableType.Float)
+                return left.ToFloat() == right.ToFloat();
+            else if (left.type == NbkVariableType.Bool)
+                return left.ToBool() == right.ToBool();
+            else
+                return left.value == right.value;
         }
 
         public static bool operator !=(NbkVariable left, NbkVariable right)
@@ -26,7 +47,14 @@ namespace Nabuki
             if (left.type != right.type)
                 throw new NbkTypeCompareException(left.type, right.type);
 
-            return left.GetValue() != right.GetValue();
+            if (left.type == NbkVariableType.Int)
+                return left.ToInt() != right.ToInt();
+            else if (left.type == NbkVariableType.Float)
+                return left.ToFloat() != right.ToFloat();
+            else if (left.type == NbkVariableType.Bool)
+                return left.ToBool() != right.ToBool();
+            else
+                return left.value != right.value;
         }
 
         public static bool operator >(NbkVariable left, NbkVariable right)
@@ -36,7 +64,12 @@ namespace Nabuki
             if (left.type.IsEither(NbkVariableType.Bool, NbkVariableType.String))
                 throw new NbkTypeCompareException(left.type, NbkCompareType.LeftBig);
 
-            return left.GetValue() > right.GetValue();
+            if (left.type == NbkVariableType.Int)
+                return left.ToInt() > right.ToInt();
+            else if (left.type == NbkVariableType.Float)
+                return left.ToFloat() > right.ToFloat();
+            else
+                throw new NbkTypeCompareException(left.type, NbkCompareType.LeftBig);
         }
 
         public static bool operator <(NbkVariable left, NbkVariable right)
@@ -46,7 +79,12 @@ namespace Nabuki
             if (left.type.IsEither(NbkVariableType.Bool, NbkVariableType.String))
                 throw new NbkTypeCompareException(left.type, NbkCompareType.RightBig);
 
-            return left.GetValue() < right.GetValue();
+            if (left.type == NbkVariableType.Int)
+                return left.ToInt() < right.ToInt();
+            else if (left.type == NbkVariableType.Float)
+                return left.ToFloat() < right.ToFloat();
+            else
+                throw new NbkTypeCompareException(left.type, NbkCompareType.RightBig);
         }
 
         public static bool operator >=(NbkVariable left, NbkVariable right)
@@ -56,7 +94,12 @@ namespace Nabuki
             if (left.type.IsEither(NbkVariableType.Bool, NbkVariableType.String))
                 throw new NbkTypeCompareException(left.type, NbkCompareType.LeftBigSame);
 
-            return left.GetValue() >= right.GetValue();
+            if (left.type == NbkVariableType.Int)
+                return left.ToInt() >= right.ToInt();
+            else if (left.type == NbkVariableType.Float)
+                return left.ToFloat() >= right.ToFloat();
+            else
+                throw new NbkTypeCompareException(left.type, NbkCompareType.LeftBigSame);
         }
 
         public static bool operator <=(NbkVariable left, NbkVariable right)
@@ -66,61 +109,42 @@ namespace Nabuki
             if (left.type.IsEither(NbkVariableType.Bool, NbkVariableType.String))
                 throw new NbkTypeCompareException(left.type, NbkCompareType.RightBigSame);
 
-            return left.GetValue() <= right.GetValue();
+            if (left.type == NbkVariableType.Int)
+                return left.ToInt() <= right.ToInt();
+            else if (left.type == NbkVariableType.Float)
+                return left.ToFloat() <= right.ToFloat();
+            else
+                throw new NbkTypeCompareException(left.type, NbkCompareType.RightBigSame);
         }
 
         #endregion
 
-        public NbkVariable(NbkVariableType t, string k, dynamic v)
+        public bool IsInt()
         {
-            type = t;
-            key = k;
-
-            SetValue(v);
+            return int.TryParse(value, out _);
         }
 
-        public NbkVariableType GetNbkType() => type;
-
-        public dynamic GetValue() => value;
-
-        public T GetValue<T>() => (T)value;
-
-        public void SetValue(dynamic v)
+        public bool IsFloat()
         {
-            CheckValueType(v);
+            return float.TryParse(value, out _);
+        }
 
+        public bool IsBool()
+        {
+            return bool.TryParse(value, out _);
+        }
+
+        public int ToInt() => int.Parse(value);
+        public float ToFloat() => float.Parse(value);
+        public bool ToBool() => bool.Parse(value);
+
+        public void SetValue(string v)
+        {
+            if (type == NbkVariableType.Int && !int.TryParse(v, out _)
+                || type == NbkVariableType.Float && !float.TryParse(v, out _)
+                || type == NbkVariableType.Bool && !bool.TryParse(v, out _))
+                throw new NbkValueTypeException(type);
             value = v;
-        }
-
-        public void SetValue(NbkVariableType t, dynamic v)
-        {
-            if (type != t)
-                throw new NbkValueTypeException(type, t);
-
-            value = v;
-        }
-
-        void CheckValueType(dynamic v)
-        {
-            switch (type)
-            {
-                case NbkVariableType.Int:
-                    if (v.GetType() != typeof(int))
-                        throw new NbkValueTypeException(type);
-                    break;
-                case NbkVariableType.Float:
-                    if (v.GetType() != typeof(float))
-                        throw new NbkValueTypeException(type);
-                    break;
-                case NbkVariableType.Bool:
-                    if (v.GetType() != typeof(bool))
-                        throw new NbkValueTypeException(type);
-                    break;
-                case NbkVariableType.String:
-                    if (v.GetType() != typeof(string))
-                        throw new NbkValueTypeException(type);
-                    break;
-            }
         }
     }
 
@@ -144,24 +168,11 @@ namespace Nabuki
         public void Link()
         {
             left = DialogueManager.GetVariable(leftKey);
-
             try { right = DialogueManager.GetVariable(rightKey); }
-            catch 
-            {
-                dynamic rv = null;
-                switch(left.GetNbkType())
-                {
-                    case NbkVariableType.Int:
-                        rv = int.Parse(rightKey); break;
-                    case NbkVariableType.Float:
-                        rv = float.Parse(rightKey); break;
-                    case NbkVariableType.Bool:
-                        rv = bool.Parse(rightKey); break;
-                    case NbkVariableType.String:
-                        rv = rightKey; break;
-                }
-                right = new NbkVariable(left.GetNbkType(), "hotvalue", rv);
-            }
+            catch { right = new NbkVariable("hotvalue", rightKey); }
+
+            if (left.type != right.type)
+                throw new NbkTypeCompareException(left.type, right.type);
         }
 
         public bool Get()
