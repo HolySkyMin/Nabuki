@@ -3,49 +3,46 @@
 	character	alice	앨리스
 	character	eve	이브
 
-	define	staytime	int	5
-	define	curtime	int	7
-	define	selectres	int
+	define	staytime	5
+	define	curtime	7
+	define	selectres	0
 
+#	default phase: 0
 none		...아아, 못 보던 천장이다. 아무래도 술을 밤늦게까지 먹다가 이렇게 된 모양이다.
 alice		몸 상태는 좀 어떠신가요?
 player		어어, 네, 이제는 조금 나은 것 같네요.
 alice		다행이네요, 실려오실 때에는 정말로 큰일 나는 줄 알았어요.
 
-	select	제가 몇 시간 동안 여기에 있었나요?|지금은 몇 시인가요?	1, 2	selectres
+	select	제가 몇 시간 동안 여기에 있었나요?|지금은 몇 시인가요?	1, 2	saveto: selectres
 
-	if	selectres	==	1
+	phase	1
 alice		환자분 여기 오신 지 {staytime}시간 되었어요.
 player		오 세상에, 새벽 한창일 때 실려왔다는 소리잖아. 무슨 일이 있었던 거죠?
 alice		아, 그게......
-	elseif	selectres	==	2
-alice		어... 지금은 아침 {curtime}이에요.
+	nextphase	3
+	
+	phase	2
+alice		어... 지금은 아침 {curtime}시에요.
 player		벌써 아침이라고요? 그럼 도대체 전 언제 어떻게 여기에 오게 된 거죠?
 alice		말하자면 좀 긴데 그게......
-	endif
+	nextphase	3
 
+	phase	3
 none		그 순간, 전화기가 울렸다.
 player		어어, 잠시 전화 좀 받으러 나가도 될까요?
 alice		네, 그러세요.
-
 none		전화기를 들어 전화를 받았다.
 eve		도대체 어디 박혀 있는 거야!!! 사람 걱정끼치잖아!!!	unskippable
 player		으아아아아아악!!!
 
-	select	나 어제 기억이 하나도 나지 않는다고!|나 병원에 있어, 걱정 마.|시끄러워, 소리 좀 줄여!	1, 2, 3
+	select	나 어제 기억이 하나도 나지 않는다고!|나 병원에 있어, 걱정 마.|시끄러워, 소리 좀 줄여!	4, 5, 6
 
-
-	phase	1
-
+	phase	4
 eve		그게 너가 할 소리야? 어제 날 그렇게 고생시켜 놓고선!
 player		??????
-
-	phase	2
-
+	phase	5
 eve		나한테 고마워하라고. 거기까지 옮겨다 준 게 나니까!
 player		!!!!!!
-
-	phase	3
-
+	phase	6
 eve		소리를 줄일 상황이야 이게? 내가 널 어떻게 살려냈는데!
 player		아, 미안 미안!

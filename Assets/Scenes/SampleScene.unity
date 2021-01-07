@@ -172,6 +172,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!114 &41927544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1565,8 +1567,8 @@ MonoBehaviour:
   m_fontSizeBase: 35
   m_fontWeight: 400
   m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMin: 35
+  m_fontSizeMax: 35
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -2037,7 +2039,7 @@ MonoBehaviour:
   selector: {fileID: 750940719}
   logger: {fileID: 576601019}
   audio: {fileID: 517111338}
-  enableLog: 0
+  enableLog: 1
   phase: 0
   dialogueIndex: 0
   data:
@@ -2517,7 +2519,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "[\uB300\uD654 \uD14D\uC2A4\uD2B8]"
+  m_text: "[\uB300\uD654 \uD14D\uC2A4\uD2B8\uC640]"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 868d32d70dae67f4aa21a7dc8df9de3a, type: 2}
   m_sharedMaterial: {fileID: 2710846988175700868, guid: 868d32d70dae67f4aa21a7dc8df9de3a,
@@ -2548,9 +2550,9 @@ MonoBehaviour:
   m_fontSize: 35
   m_fontSizeBase: 35
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 35
+  m_fontSizeMax: 35
   m_fontStyle: 0
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
@@ -2760,6 +2762,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aad5758a648fd104fa6e5530392c8051, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allowInput: 0
   hasInput: 0
 --- !u!1 &1492381412
 GameObject:
@@ -2790,7 +2793,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c91c1d83e7485cd40ae11c6ac08c3200, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialog: {fileID: 2811297602134710623, guid: 1d08a8bb5ccd179458ac45f27db0ab11, type: 3}
+  dialog: {fileID: 2811297602134710623, guid: 4be479f8045fca2418817c240f9b6eb6, type: 3}
 --- !u!4 &1492381414
 Transform:
   m_ObjectHideFlags: 0
