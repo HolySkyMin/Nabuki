@@ -11,6 +11,9 @@ namespace Nabuki
 
         public static DialogueSource Source;
 
+        public bool Ended { get; private set; }
+        public int Phase { get { return phase; } }
+
         public DialogueBackground background;
         public DialogueBackground foreground;
         public SpriteRenderer sceneDimmer;
@@ -26,11 +29,12 @@ namespace Nabuki
         [Header("Dialogue Setting")]
         public bool enableLog;
 
-        [HideInInspector] public int phase, dialogueIndex;
         [HideInInspector] public NbkData data;
         [HideInInspector] public Dictionary<string, DialogueCharacter> characters;
         [HideInInspector] public Dictionary<string, System.Action> externalAction;
         [HideInInspector] public Dictionary<string, System.Func<NbkTokenizer, IDialogue>> customSyntax;
+
+        internal int phase, dialogueIndex;
 
         public static NbkVariable GetVariable(string key) => Now.data.GetVariable(key);
 
@@ -52,9 +56,8 @@ namespace Nabuki
             characters = new Dictionary<string, DialogueCharacter>();
             externalAction = new Dictionary<string, System.Action>();
             customSyntax = new Dictionary<string, System.Func<NbkTokenizer, IDialogue>>();
-
-            // Data load
-            data = new NbkData() { variables = new Dictionary<string, NbkVariable>() };
+            Ended = false;
+            phase = 0;
         }
 
         private void OnDestroy()
@@ -123,10 +126,10 @@ namespace Nabuki
         
         IEnumerator Play_Routine(Dictionary<int, List<IDialogue>> dialogue)
         {
-            phase = 0;
-
             for (dialogueIndex = 0; dialogueIndex < dialogue[phase].Count; dialogueIndex++)
                 yield return dialogue[phase][dialogueIndex].Run(this);
+
+            Ended = true;
         }
 
         public IEnumerator SceneFadeIn(float time)

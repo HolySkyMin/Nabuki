@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Nabuki
 {
+    [RequireComponent(typeof(CanvasGroup))]
     public class DialogueDisplayer : MonoBehaviour
     {
         public TMP_Text nameText, bodyText;
@@ -14,9 +15,12 @@ namespace Nabuki
         public int cps;
         public bool removeNametagWhenNull;
 
+        bool visible = false;
+
         public IEnumerator ShowText(string talker, string text, bool unskippable = false)
         {
-            endIndicator.SetActive(false);
+            if (!visible)
+                yield return Appear();
 
             nameTag.SetActive(talker != "" || !removeNametagWhenNull);
             nameText.SetText(talker);
@@ -60,15 +64,22 @@ namespace Nabuki
             DialogueManager.Now.proceeder.allowInput = true;
             yield return new WaitUntil(() => DialogueManager.Now.proceeder.hasInput);
             DialogueManager.Now.proceeder.hasInput = false;
+            endIndicator.SetActive(false);
         }
 
         public IEnumerator Appear()
         {
+            var cg = GetComponent<CanvasGroup>();
+            cg.alpha = 1;
+            visible = true;
             yield break;
         }
 
         public IEnumerator Disappear()
         {
+            var cg = GetComponent<CanvasGroup>();
+            cg.alpha = 0;
+            visible = false;
             yield break;
         }
     }
