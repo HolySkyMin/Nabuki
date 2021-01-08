@@ -684,7 +684,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &391135610
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2281,8 +2281,6 @@ MonoBehaviour:
   logger: {fileID: 576601019}
   audio: {fileID: 517111338}
   enableLog: 1
-  phase: 0
-  dialogueIndex: 0
   data:
     playerName: 
 --- !u!4 &999049026
@@ -2788,7 +2786,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "[\uCE90\uB9AD\uD130 \uC774\uB984]"
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 868d32d70dae67f4aa21a7dc8df9de3a, type: 2}
   m_sharedMaterial: {fileID: 2710846988175700868, guid: 868d32d70dae67f4aa21a7dc8df9de3a,
@@ -2922,7 +2920,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "[\uB300\uD654 \uD14D\uC2A4\uD2B8\uC640]"
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 868d32d70dae67f4aa21a7dc8df9de3a, type: 2}
   m_sharedMaterial: {fileID: 2710846988175700868, guid: 868d32d70dae67f4aa21a7dc8df9de3a,
@@ -3654,6 +3652,7 @@ GameObject:
   - component: {fileID: 1892924853}
   - component: {fileID: 1892924852}
   - component: {fileID: 1892924854}
+  - component: {fileID: 1892924855}
   m_Layer: 5
   m_Name: Dialogue Displayer
   m_TagString: Untagged
@@ -3741,6 +3740,18 @@ MonoBehaviour:
   animateText: 1
   cps: 30
   removeNametagWhenNull: 1
+--- !u!225 &1892924855
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1892924850}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1921683223
 GameObject:
   m_ObjectHideFlags: 0
