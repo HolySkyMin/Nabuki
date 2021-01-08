@@ -11,6 +11,9 @@ namespace Nabuki
 
         public static DialogueSource Source;
 
+        public DialogueBackground background;
+        public DialogueBackground foreground;
+        public SpriteRenderer sceneDimmer;
         public DialogueCharacter characterTemplate;
         public DialogueField[] characterField;
         public DialogueField[] effectField;
@@ -124,6 +127,32 @@ namespace Nabuki
 
             for (dialogueIndex = 0; dialogueIndex < dialogue[phase].Count; dialogueIndex++)
                 yield return dialogue[phase][dialogueIndex].Run(this);
+        }
+
+        public IEnumerator SceneFadeIn(float time)
+        {
+            sceneDimmer.color = Color.black;
+            for(var clock = 0f; clock < time; clock += Time.deltaTime)
+            {
+                var progress = clock / time;
+                sceneDimmer.color = Color.Lerp(Color.black, Color.clear, progress);
+                yield return null;
+            }
+            sceneDimmer.color = Color.clear;
+            sceneDimmer.gameObject.SetActive(false);
+        }
+
+        public IEnumerator SceneFadeOut(float time)
+        {
+            sceneDimmer.color = Color.clear;
+            sceneDimmer.gameObject.SetActive(true);
+            for (var clock = 0f; clock < time; clock += Time.deltaTime)
+            {
+                var progress = clock / time;
+                sceneDimmer.color = Color.Lerp(Color.clear, Color.black, progress);
+                yield return null;
+            }
+            sceneDimmer.color = Color.black;
         }
     }
 }
