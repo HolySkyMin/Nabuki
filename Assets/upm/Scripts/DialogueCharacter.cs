@@ -92,7 +92,7 @@ namespace Nabuki
             for (var clock = 0f; clock < time; clock += Time.deltaTime)
             {
                 var progress = clock / time;
-                image.color = new Color(image.color.r, image.color.g, image.color.b, progress);
+                image.color = new Color(image.color.r, image.color.g, image.color.b, 1 - progress);
                 yield return null;
             }
             image.color = new Color(image.color.r, image.color.g, image.color.b, 0);

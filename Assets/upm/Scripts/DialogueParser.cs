@@ -106,6 +106,10 @@ namespace Nabuki
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new DialogueDataSystem() { type = 4, musicKey = param[0].content };
                         break;
+                    case "waitfor":
+                        param = tokenizer.GetParameter(NbkTokenType.Value);
+                        newCommand = new DialogueDataSystem() { type = 5, duration = float.Parse(param[0].content) };
+                        break;
                     case "call":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new DialogueDataSystem() { type = 10, variableKey = param[0].content };
@@ -259,6 +263,101 @@ namespace Nabuki
                         foreach (var tag in tags)
                             if (tag.function == "wait")
                                 ((DialogueDataCharacter)newCommand).shouldWait = true;
+                        break;
+
+                    case "scenefadein":
+                        param = tokenizer.GetParameter(NbkTokenType.Value);
+                        newCommand = new DialogueDataScene() { type = 0, duration = float.Parse(param[0].content) };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((DialogueDataScene)newCommand).shouldWait = true;
+                        break;
+                    case "scenefadeout":
+                        param = tokenizer.GetParameter(NbkTokenType.Value);
+                        newCommand = new DialogueDataScene() { type = 1, duration = float.Parse(param[0].content) };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((DialogueDataScene)newCommand).shouldWait = true;
+                        break;
+                    case "setbg":
+                    case "setfg":
+                        param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Tuple, NbkTokenType.Value);
+                        newCommand = new DialogueDataScene()
+                        {
+                            type = 2,
+                            spriteKey = param[0].content,
+                            position = new Vector2(float.Parse(((NbkTupleToken)param[1]).items[0]), float.Parse(((NbkTupleToken)param[1]).items[1])),
+                            scale = float.Parse(param[2].content),
+                            isForeground = command.content == "setfg" 
+                        };
+                        break;
+                    case "bgshow":
+                    case "fgshow":
+                        newCommand = new DialogueDataScene() { type = 3, isForeground = command.content == "fgshow" };
+                        break;
+                    case "bghide":
+                    case "fghide":
+                        newCommand = new DialogueDataScene() { type = 4, isForeground = command.content == "fghide" };
+                        break;
+                    case "bgfadein":
+                    case "fgfadein":
+                        param = tokenizer.GetParameter(NbkTokenType.Value);
+                        newCommand = new DialogueDataScene() { type = 5, duration = float.Parse(param[0].content), isForeground = command.content == "fgfadein" };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((DialogueDataScene)newCommand).shouldWait = true;
+                        break;
+                    case "bgfadeout":
+                    case "fgfadeout":
+                        param = tokenizer.GetParameter(NbkTokenType.Value);
+                        newCommand = new DialogueDataScene() { type = 6, duration = float.Parse(param[0].content), isForeground = command.content == "fgfadeout" };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((DialogueDataScene)newCommand).shouldWait = true;
+                        break;
+                    case "bgcrossfade":
+                    case "fgcrossfade":
+                        param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
+                        newCommand = new DialogueDataScene() { type = 7, spriteKey = param[0].content, 
+                            duration = float.Parse(param[1].content), isForeground = command.content == "fgcrossfade" };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((DialogueDataScene)newCommand).shouldWait = true;
+                        break;
+                    case "bgmove":
+                    case "fgmove":
+                        param = tokenizer.GetParameter(NbkTokenType.Tuple, NbkTokenType.Value);
+                        newCommand = new DialogueDataScene()
+                        {
+                            type = 8,
+                            position = new Vector2(float.Parse(((NbkTupleToken)param[0]).items[0]), float.Parse(((NbkTupleToken)param[0]).items[1])),
+                            duration = float.Parse(param[1].content),
+                            isForeground = command.content == "fgmove"
+                        };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((DialogueDataScene)newCommand).shouldWait = true;
+                        break;
+                    case "bgscale":
+                    case "fgscale":
+                        param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
+                        newCommand = new DialogueDataScene()
+                        {
+                            type = 9,
+                            scale = float.Parse(param[0].content),
+                            duration = float.Parse(param[1].content),
+                            isForeground = command.content == "fgscale"
+                        };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((DialogueDataScene)newCommand).shouldWait = true;
                         break;
 
                     case "": return;

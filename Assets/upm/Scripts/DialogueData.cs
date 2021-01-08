@@ -223,10 +223,102 @@ namespace Nabuki
         }
     }
 
+    public class DialogueDataScene : IDialogue
+    {
+        public int type;
+        public string spriteKey;
+        public Vector2 position;
+        public float scale;
+        public float duration;
+        public bool shouldWait;
+        public bool isForeground;
+
+        public IEnumerator Run(DialogueManager dialog)
+        {
+            switch(type)
+            {
+                case 0:  // scenefadein
+                    if (shouldWait)
+                        yield return dialog.SceneFadeIn(duration);
+                    else
+                        dialog.StartCoroutine(dialog.SceneFadeIn(duration));
+                    break;
+                case 1: // scenefadeout
+                    if (shouldWait)
+                        yield return dialog.SceneFadeOut(duration);
+                    else
+                        dialog.StartCoroutine(dialog.SceneFadeOut(duration));
+                    break;
+                case 2: // setbg, setfg
+                    if (isForeground)
+                    {
+                        dialog.foreground.SetSprite(DialogueManager.Source.GetSprite(spriteKey));
+                        dialog.foreground.SetPosition(position);
+                        dialog.foreground.SetScale(scale);
+                    }
+                    else
+                    {
+                        dialog.background.SetSprite(DialogueManager.Source.GetSprite(spriteKey));
+                        dialog.background.SetPosition(position);
+                        dialog.background.SetScale(scale);
+                    }
+                    break;
+                case 3: // bgshow, fgshow
+                    if (isForeground)
+                        dialog.foreground.Show();
+                    else
+                        dialog.background.Show();
+                    break;
+                case 4: // bghide, fghide
+                    if (isForeground)
+                        dialog.foreground.Hide();
+                    else
+                        dialog.background.Hide();
+                    break;
+                case 5: // bgfadein, fgfadein
+                    if (shouldWait)
+                        yield return isForeground ? dialog.foreground.FadeIn(duration) : dialog.background.FadeIn(duration);
+                    else
+                        dialog.StartCoroutine(isForeground ? dialog.foreground.FadeIn(duration) : dialog.background.FadeIn(duration));
+                    break;
+                case 6: // bgfadeout, fgfadeout
+                    if (shouldWait)
+                        yield return isForeground ? dialog.foreground.FadeOut(duration) : dialog.background.FadeOut(duration);
+                    else
+                        dialog.StartCoroutine(isForeground ? dialog.foreground.FadeOut(duration) : dialog.background.FadeOut(duration));
+                    break;
+                case 7: // bgcrossfade, fgcrossfade
+                    if (shouldWait)
+                        yield return isForeground 
+                            ? dialog.foreground.CrossFade(DialogueManager.Source.GetSprite(spriteKey), duration) 
+                            : dialog.background.CrossFade(DialogueManager.Source.GetSprite(spriteKey), duration);
+                    else
+                        dialog.StartCoroutine(isForeground
+                            ? dialog.foreground.CrossFade(DialogueManager.Source.GetSprite(spriteKey), duration)
+                            : dialog.background.CrossFade(DialogueManager.Source.GetSprite(spriteKey), duration));
+                    break;
+                case 8: // bgmove, fgmove
+                    if (shouldWait)
+                        yield return isForeground ? dialog.foreground.Move(position, duration) : dialog.background.Move(position, duration);
+                    else
+                        dialog.StartCoroutine(isForeground ? dialog.foreground.Move(position, duration) : dialog.background.Move(position, duration));
+                    break;
+                case 9: // bgscale, fgscale
+                    if (shouldWait)
+                        yield return isForeground ? dialog.foreground.Scale(scale, duration) : dialog.background.Scale(scale, duration);
+                    else
+                        dialog.StartCoroutine(isForeground ? dialog.foreground.Scale(scale, duration) : dialog.background.Scale(scale, duration));
+                    break;
+            }
+            yield break;
+        }
+    }
+
     public class DialogueDataSystem : IDialogue
     {
         public int type;
         public int phase;
+        public float duration;
         public string musicKey;
         public string variableKey;
         public NbkVariableType variableType;
@@ -252,6 +344,9 @@ namespace Nabuki
                 case 4: // play sound effect
                     dialog.audio.PlaySE(musicKey);
                     yield break;
+                case 5: // waitfor
+                    yield return new WaitForSeconds(duration);
+                    break;
             }
         }
     }
