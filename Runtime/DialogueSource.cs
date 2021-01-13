@@ -3,26 +3,46 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+#if ADDRESSABLE_EXISTS
+using UnityEngine.AddressableAssets;
+#endif
 
 namespace Nabuki
 {
+    public enum DialogueSourceType 
+    { 
+        Resources, AssetBundle,
+#if ADDRESSABLE_EXISTS
+        Addressable
+#endif
+    }
+
     public class DialogueSource
     {
         public readonly DialogueSourceType sourceType;
         public string imagePath, soundPath, objectPath;
         public AssetBundle imageBundle, soundBundle, objectBundle;
 
+        Dictionary<string, Sprite> spriteDic;
+        Dictionary<string, AudioClip> audioDic;
+
         public DialogueSource(DialogueSourceType type)
         {
             sourceType = type;
+
+            spriteDic = new Dictionary<string, Sprite>();
+            audioDic = new Dictionary<string, AudioClip>();
         }
 
-        public DialogueSource(string ip, string sp, string op)
+        public DialogueSource(string ip, string sp, string op, DialogueSourceType type = DialogueSourceType.Resources)
         {
             imagePath = ip;
             soundPath = sp;
             objectPath = op;
-            sourceType = DialogueSourceType.Resources;
+            sourceType = type;
+
+            spriteDic = new Dictionary<string, Sprite>();
+            audioDic = new Dictionary<string, AudioClip>();
         }
 
         public DialogueSource(AssetBundle ib, AssetBundle sb, AssetBundle ob)
@@ -31,6 +51,9 @@ namespace Nabuki
             soundBundle = sb;
             objectBundle = ob;
             sourceType = DialogueSourceType.AssetBundle;
+
+            spriteDic = new Dictionary<string, Sprite>();
+            audioDic = new Dictionary<string, AudioClip>();
         }
 
         public Sprite GetSprite(string key)
@@ -49,20 +72,33 @@ namespace Nabuki
 
         public IEnumerator GetSpriteAsync(string key, Action<Sprite> callback)
         {
-            switch(sourceType)
+            if (!spriteDic.ContainsKey(key))
             {
-                case DialogueSourceType.Resources:
-                    var progress = Resources.LoadAsync<Sprite>(Path.Combine(imagePath, key).Replace("\\", "/"));
-                    yield return new WaitUntil(() => progress.isDone);
-                    callback(progress.asset as Sprite);
-                    break;
-                case DialogueSourceType.AssetBundle:
-                    var progress2 = imageBundle.LoadAssetAsync<Texture2D>(key);
-                    yield return new WaitUntil(() => progress2.isDone);
-                    var texture = progress2.asset as Texture2D;
-                    callback(Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
-                    break;
+                switch(sourceType)
+                {
+                    case DialogueSourceType.Resources:
+                        var progress = Resources.LoadAsync<Sprite>(Path.Combine(imagePath, key).Replace("\\", "/"));
+                        yield return new WaitUntil(() => progress.isDone);
+                        spriteDic.Add(key, progress.asset as Sprite);
+                        break;
+                    case DialogueSourceType.AssetBundle:
+                        var progress2 = imageBundle.LoadAssetAsync<Texture2D>(key);
+                        yield return new WaitUntil(() => progress2.isDone);
+                        var texture = progress2.asset as Texture2D;
+                        spriteDic.Add(key, Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
+                        break;
+#if ADDRESSABLE_EXISTS
+                    case DialogueSourceType.Addressable:
+                        var progress3 = Addressables.LoadAssetAsync<Sprite>(Path.Combine(imagePath, key));
+                        yield return new WaitUntil(() => progress3.IsDone);
+                        spriteDic.Add(key, progress3.Result);
+                        break;
+#endif
+                }
             }
+
+            callback(spriteDic[key]);
+            yield break;
         }
 
         public AudioClip GetSound(string key)
@@ -80,19 +116,32 @@ namespace Nabuki
 
         public IEnumerator GetSoundAsync(string key, Action<AudioClip> callback)
         {
-            switch(sourceType)
+            if(!audioDic.ContainsKey(key))
             {
-                case DialogueSourceType.Resources:
-                    var progress = Resources.LoadAsync<AudioClip>(Path.Combine(soundPath, key).Replace("\\", "/"));
-                    yield return new WaitUntil(() => progress.isDone);
-                    callback(progress.asset as AudioClip);
-                    break;
-                case DialogueSourceType.AssetBundle:
-                    var progress2 = soundBundle.LoadAssetAsync<AudioClip>(key);
-                    yield return new WaitUntil(() => progress2.isDone);
-                    callback(progress2.asset as AudioClip);
-                    break;
+                switch (sourceType)
+                {
+                    case DialogueSourceType.Resources:
+                        var progress = Resources.LoadAsync<AudioClip>(Path.Combine(soundPath, key).Replace("\\", "/"));
+                        yield return new WaitUntil(() => progress.isDone);
+                        audioDic.Add(key, progress.asset as AudioClip);
+                        break;
+                    case DialogueSourceType.AssetBundle:
+                        var progress2 = soundBundle.LoadAssetAsync<AudioClip>(key);
+                        yield return new WaitUntil(() => progress2.isDone);
+                        audioDic.Add(key, progress2.asset as AudioClip);
+                        break;
+#if ADDRESSABLE_EXISTS
+                    case DialogueSourceType.Addressable:
+                        var progress3 = Addressables.LoadAssetAsync<AudioClip>(Path.Combine(soundPath, key));
+                        yield return new WaitUntil(() => progress3.IsDone);
+                        audioDic.Add(key, progress3.Result);
+                        break;
+#endif
+                }
             }
+
+            callback(audioDic[key]);
+            yield break;
         }
 
         public GameObject GetObject(string key)
@@ -124,9 +173,29 @@ namespace Nabuki
                     yield return new WaitUntil(() => progress2.isDone);
                     callback(GameObject.Instantiate(progress2.asset as GameObject));
                     break;
+#if ADDRESSABLE_EXISTS
+                case DialogueSourceType.Addressable:
+                    var progress3 = Addressables.InstantiateAsync(Path.Combine(objectPath, key));
+                    yield return new WaitUntil(() => progress3.IsDone);
+                    callback(progress3.Result);
+                    break;
+#endif
             }
         }
-    }
 
-    public enum DialogueSourceType { Resources, AssetBundle }
+        public void Dispose()
+        {
+#if ADDRESSABLE_EXISTS
+            if(sourceType == DialogueSourceType.Addressable)
+            {
+                foreach (var sprite in spriteDic)
+                    Addressables.Release(sprite.Value);
+                foreach (var audio in audioDic)
+                    Addressables.Release(audio.Value);
+            }
+#endif
+            spriteDic.Clear();
+            audioDic.Clear();
+        }
+    }
 }
