@@ -62,6 +62,7 @@ namespace Nabuki
 
         private void OnDestroy()
         {
+            Source.Dispose();
             Now = null;
         }
 

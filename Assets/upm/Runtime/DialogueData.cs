@@ -142,8 +142,11 @@ namespace Nabuki
                     break;
                 case 1: // setsprite
                     var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
-                    var sprite = DialogueManager.Source.GetSprite(fileName);
-                    dialog.characters[characterKey].image.sprite = sprite == null ? dialog.characters[characterKey].defaultSprite : sprite;
+                    //var sprite = DialogueManager.Source.GetSprite(fileName);
+                    yield return DialogueManager.Source.GetSpriteAsync(fileName, (sprite) =>
+                    {
+                        dialog.characters[characterKey].image.sprite = sprite == null ? dialog.characters[characterKey].defaultSprite : sprite;
+                    });
                     break;
                 case 2: // setpos
                     dialog.characters[characterKey].SetPosition(position);
@@ -252,15 +255,21 @@ namespace Nabuki
                 case 2: // setbg, setfg
                     if (isForeground)
                     {
-                        dialog.foreground.SetSprite(DialogueManager.Source.GetSprite(spriteKey));
-                        dialog.foreground.SetPosition(position);
-                        dialog.foreground.SetScale(scale);
+                        yield return DialogueManager.Source.GetSpriteAsync(spriteKey, (sprite) =>
+                        {
+                            dialog.foreground.SetSprite(sprite);
+                            dialog.foreground.SetPosition(position);
+                            dialog.foreground.SetScale(scale);
+                        });
                     }
                     else
                     {
-                        dialog.background.SetSprite(DialogueManager.Source.GetSprite(spriteKey));
-                        dialog.background.SetPosition(position);
-                        dialog.background.SetScale(scale);
+                        yield return DialogueManager.Source.GetSpriteAsync(spriteKey, (sprite) =>
+                        {
+                            dialog.background.SetSprite(sprite);
+                            dialog.background.SetPosition(position);
+                            dialog.background.SetScale(scale);
+                        });
                     }
                     break;
                 case 3: // bgshow, fgshow
@@ -288,14 +297,17 @@ namespace Nabuki
                         dialog.StartCoroutine(isForeground ? dialog.foreground.FadeOut(duration) : dialog.background.FadeOut(duration));
                     break;
                 case 7: // bgcrossfade, fgcrossfade
+                    Sprite sprite_7 = null;
+                    yield return DialogueManager.Source.GetSpriteAsync(spriteKey, sprite => { sprite_7 = sprite; });
+
                     if (shouldWait)
-                        yield return isForeground 
-                            ? dialog.foreground.CrossFade(DialogueManager.Source.GetSprite(spriteKey), duration) 
-                            : dialog.background.CrossFade(DialogueManager.Source.GetSprite(spriteKey), duration);
+                        yield return isForeground
+                            ? dialog.foreground.CrossFade(sprite_7, duration)
+                            : dialog.background.CrossFade(sprite_7, duration);
                     else
                         dialog.StartCoroutine(isForeground
-                            ? dialog.foreground.CrossFade(DialogueManager.Source.GetSprite(spriteKey), duration)
-                            : dialog.background.CrossFade(DialogueManager.Source.GetSprite(spriteKey), duration));
+                            ? dialog.foreground.CrossFade(sprite_7, duration)
+                            : dialog.background.CrossFade(sprite_7, duration));
                     break;
                 case 8: // bgmove, fgmove
                     if (shouldWait)

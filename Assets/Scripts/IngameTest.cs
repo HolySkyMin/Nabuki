@@ -10,7 +10,7 @@ public class IngameTest : MonoBehaviour
     // Start is called before the first frame update
     IEnumerator Start()
     {
-        DialogueManager.Source = new DialogueSource("Images/", "Sounds/", "Prefabs/");
+        DialogueManager.Source = new DialogueSource("Images/", "Sounds/", "Prefabs/", DialogueSourceType.Addressable);
         DialogueManager.Now.data = new NbkData() { playerName = "플레이어" };
         DialogueManager.Now.Play(dialog.text);
         yield return new WaitUntil(() => DialogueManager.Now.Ended);

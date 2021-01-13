@@ -22,12 +22,14 @@ namespace Nabuki
         public void PlayVoice(string key)
         {
             if (key != "")
-                voice.PlayOneShot(DialogueManager.Source.GetSound(key));
+            {
+                StartCoroutine(DialogueManager.Source.GetSoundAsync(key, clip => { voice.PlayOneShot(clip); }));
+            }
         }
 
         public void PlaySE(string key)
         {
-            se.PlayOneShot(DialogueManager.Source.GetSound(key));
+            StartCoroutine(DialogueManager.Source.GetSoundAsync(key, clip => { se.PlayOneShot(clip); }));
         }
     }
 }
