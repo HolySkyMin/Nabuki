@@ -8,6 +8,7 @@ namespace Nabuki
 {
     public class DialogueSelector : MonoBehaviour
     {
+        public DialogueManager manager;
         public DialogueSelectButton buttonTemplate;
         public RectTransform buttonParent;
 
@@ -19,7 +20,7 @@ namespace Nabuki
         public IEnumerator ShowSelect(Dictionary<int, string> selects, Action<int> callback)
         {
             hasResult = false;
-            DialogueManager.Now.proceeder.allowInput = false;
+            manager.proceeder.allowInput = false;
 
             foreach (var obj in buttons)
                 Destroy(obj);

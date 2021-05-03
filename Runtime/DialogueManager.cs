@@ -7,20 +7,14 @@ namespace Nabuki
 {
     public class DialogueManager : MonoBehaviour
     {
-        public static DialogueManager Now { get; private set; }
-
-        public static DialogueSource Source;
-
         public bool Ended { get; private set; }
         public int Phase { get { return phase; } }
 
-        public DialogueBackground background;
-        public DialogueBackground foreground;
-        public SpriteRenderer sceneDimmer;
+        public DialogueSource source;
         public DialogueCharacter characterTemplate;
-        public DialogueField[] characterField;
-        public DialogueField[] effectField;
-        public DialogueDisplayer[] displayer;
+        public DialogueField characterField;
+        public DialogueField effectField;
+        public DialogueDisplayer displayer;
         public DialogueProceeder proceeder;
         public DialogueSelector selector;
         public DialogueLogger logger;
@@ -28,6 +22,8 @@ namespace Nabuki
 
         [Header("Dialogue Setting")]
         public bool enableLog;
+        public bool supportsBackground;
+        public bool supportsForeground;
 
         [HideInInspector] public NbkData data;
         [HideInInspector] public Dictionary<string, DialogueCharacter> characters;
@@ -36,22 +32,8 @@ namespace Nabuki
 
         internal int phase, dialogueIndex;
 
-        public static NbkVariable GetVariable(string key) => Now.data.GetVariable(key);
-
-        public static void SetVariable(string key, dynamic value) => Now.data.SetVariable(key, value);
-
-        public static void CreateVariable(string key, dynamic value) => Now.data.CreateVariable(key, value);
-
         private void Awake()
         {
-            if (Now != null)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            Now = this;
-
             // Initialize
             characters = new Dictionary<string, DialogueCharacter>();
             externalAction = new Dictionary<string, System.Action>();
@@ -62,9 +44,10 @@ namespace Nabuki
 
         private void OnDestroy()
         {
-            Source.Dispose();
-            Now = null;
+            source.Dispose();
         }
+
+        // ================
 
         public void AddCharacter(string key, string cname, int fieldIndex)
         {
@@ -73,7 +56,7 @@ namespace Nabuki
             else
             {
                 var newCharacter = Instantiate(characterTemplate);
-                newCharacter.Set(key, cname, characterField[fieldIndex]);
+                newCharacter.Set(key, cname, characterField, fieldIndex);
                 newCharacter.name = "Character: " + key;
                 newCharacter.gameObject.SetActive(true);
                 characters.Add(key, newCharacter);
@@ -119,7 +102,7 @@ namespace Nabuki
         public void Play(string script)
         {
             // Parse dialogue
-            var parser = new DialogueParser();
+            var parser = new DialogueParser(this);
             var dialogue = parser.Parse(script);
 
             StartCoroutine(Play_Routine(dialogue));
@@ -133,30 +116,18 @@ namespace Nabuki
             Ended = true;
         }
 
-        public IEnumerator SceneFadeIn(float time)
-        {
-            sceneDimmer.color = Color.black;
-            for(var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                sceneDimmer.color = Color.Lerp(Color.black, Color.clear, progress);
-                yield return null;
-            }
-            sceneDimmer.color = Color.clear;
-            sceneDimmer.gameObject.SetActive(false);
-        }
+        public void PlayBGM(string key) => audio.PlayBGM(key, source);
 
-        public IEnumerator SceneFadeOut(float time)
-        {
-            sceneDimmer.color = Color.clear;
-            sceneDimmer.gameObject.SetActive(true);
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                sceneDimmer.color = Color.Lerp(Color.clear, Color.black, progress);
-                yield return null;
-            }
-            sceneDimmer.color = Color.black;
-        }
+        public void PlayVoice(string key) => audio.PlayVoice(key, source);
+
+        public void PlaySE(string key) => audio.PlaySE(key, source);
+
+        public virtual DialogueBackground GetBackground() { return null; }
+
+        public virtual DialogueBackground GetForeground() { return null; }
+
+        public virtual IEnumerator SceneFadeIn(float time) { yield break; }
+
+        public virtual IEnumerator SceneFadeOut(float time) { yield break; }
     }
 }

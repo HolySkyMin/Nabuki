@@ -8,9 +8,9 @@ namespace Nabuki
     {
         public AudioSource bgm, voice, se;
 
-        public void PlayBGM(string key)
+        public void PlayBGM(string key, DialogueSource source)
         {
-            StartCoroutine(DialogueManager.Source.GetSoundAsync(key, clip =>
+            StartCoroutine(source.GetSoundAsync(key, clip =>
             {
                 bgm.clip = clip;
                 bgm.Play();
@@ -19,17 +19,17 @@ namespace Nabuki
 
         public void StopBGM() => bgm.Stop();
 
-        public void PlayVoice(string key)
+        public void PlayVoice(string key, DialogueSource source)
         {
             if (key != "")
             {
-                StartCoroutine(DialogueManager.Source.GetSoundAsync(key, clip => { voice.PlayOneShot(clip); }));
+                StartCoroutine(source.GetSoundAsync(key, clip => { voice.PlayOneShot(clip); }));
             }
         }
 
-        public void PlaySE(string key)
+        public void PlaySE(string key, DialogueSource source)
         {
-            StartCoroutine(DialogueManager.Source.GetSoundAsync(key, clip => { se.PlayOneShot(clip); }));
+            StartCoroutine(source.GetSoundAsync(key, clip => { se.PlayOneShot(clip); }));
         }
     }
 }
