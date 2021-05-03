@@ -6,18 +6,15 @@ using UnityEngine;
 namespace Nabuki
 {
     [RequireComponent(typeof(CanvasGroup))]
-    public class DialogueDisplayer : MonoBehaviour
+    public class StandardDialogueDisplayer : DialogueDisplayer
     {
         public TMP_Text nameText, bodyText;
         public GameObject nameTag, endIndicator, unskipIndicator;
-        [Header("Displayer Setting")]
-        public bool animateText;
-        public int cps;
         public bool removeNametagWhenNull;
 
         bool visible = false;
 
-        public IEnumerator ShowText(string talker, string text, bool unskippable = false)
+        public override IEnumerator ShowText(string talker, string text, int index, bool unskippable = false)
         {
             if (!visible)
                 yield return Appear();
@@ -27,18 +24,16 @@ namespace Nabuki
             bodyText.SetText(text);
 
             var dt = System.DateTime.Now;
-            //Debug.Log("Received text...");
-            if(animateText)
+            if (animateText)
             {
                 unskipIndicator.SetActive(unskippable);
-                DialogueManager.Now.proceeder.allowInput = !unskippable;
+                manager.proceeder.allowInput = !unskippable;
 
                 int i = 0;
                 float clock = 0f, spc = 1f / cps;
 
                 bodyText.maxVisibleCharacters = 0;
                 yield return null;
-                //Debug.Log("Updated text info. Time consumed: " + (System.DateTime.Now - dt).TotalSeconds);
                 while (i < bodyText.textInfo.characterCount)
                 {
                     var next = Mathf.FloorToInt(clock / spc);
@@ -48,9 +43,9 @@ namespace Nabuki
                         bodyText.maxVisibleCharacters = i;
                     }
 
-                    if(!unskippable && DialogueManager.Now.proceeder.hasInput)
+                    if (!unskippable && manager.proceeder.hasInput)
                     {
-                        DialogueManager.Now.proceeder.hasInput = false;
+                        manager.proceeder.hasInput = false;
                         break;
                     }
 
@@ -61,13 +56,13 @@ namespace Nabuki
             }
 
             endIndicator.SetActive(true);
-            DialogueManager.Now.proceeder.allowInput = true;
-            yield return new WaitUntil(() => DialogueManager.Now.proceeder.hasInput);
-            DialogueManager.Now.proceeder.hasInput = false;
+            manager.proceeder.allowInput = true;
+            yield return new WaitUntil(() => manager.proceeder.hasInput);
+            manager.proceeder.hasInput = false;
             endIndicator.SetActive(false);
         }
 
-        public IEnumerator Appear()
+        public override IEnumerator Appear()
         {
             var cg = GetComponent<CanvasGroup>();
             cg.alpha = 1;
@@ -75,7 +70,7 @@ namespace Nabuki
             yield break;
         }
 
-        public IEnumerator Disappear()
+        public override IEnumerator Disappear()
         {
             var cg = GetComponent<CanvasGroup>();
             cg.alpha = 0;

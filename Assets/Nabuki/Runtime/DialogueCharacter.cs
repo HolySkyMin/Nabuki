@@ -15,13 +15,19 @@ namespace Nabuki
         [HideInInspector] public DialogueField field;
 
         Vector2 position;
+        int slotIndex;
 
-        public void Set(string k, string n, DialogueField f)
+        public void Set(string k, string n, DialogueField f, int i)
         {
             key = k;
             charaName = n;
             field = f;
-            position = new Vector2(0.5f, 0.5f);
+            slotIndex = i;
+
+            if (field.usesSlot)
+                position = field.slots[slotIndex];
+            else
+                position = new Vector2(0.5f, 0.5f);
 
             body.name = "Sprite: " + key;
             body.SetParent(field.transform);
@@ -31,6 +37,11 @@ namespace Nabuki
 
         public void Show()
         {
+            if(field.usesSlot)
+            {
+                SetPosition(field.slots[slotIndex]);
+                field.FillSlot(slotIndex, key);
+            }
             image.color = new Color(image.color.r, image.color.g, image.color.b, 1);
             body.gameObject.SetActive(true);
         }

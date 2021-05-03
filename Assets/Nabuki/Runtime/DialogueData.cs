@@ -66,10 +66,10 @@ namespace Nabuki
             }
 
             if (voiceKey != "")
-                dialog.audio.PlayVoice(voiceKey);
+                dialog.PlayVoice(voiceKey);
             if (dialog.enableLog)
                 dialog.logger.Log(realTalker, text, voiceKey, isPlayer);
-            yield return dialog.displayer[displayIndex].ShowText(realTalker, text, unstoppable);
+            yield return dialog.displayer.ShowText(realTalker, text, displayIndex, unstoppable);
         }
     }
 
@@ -143,7 +143,7 @@ namespace Nabuki
                 case 1: // setsprite
                     var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
                     //var sprite = DialogueManager.Source.GetSprite(fileName);
-                    yield return DialogueManager.Source.GetSpriteAsync(fileName, (sprite) =>
+                    yield return dialog.source.GetSpriteAsync(fileName, (sprite) =>
                     {
                         dialog.characters[characterKey].image.sprite = sprite == null ? dialog.characters[characterKey].defaultSprite : sprite;
                     });
@@ -255,71 +255,71 @@ namespace Nabuki
                 case 2: // setbg, setfg
                     if (isForeground)
                     {
-                        yield return DialogueManager.Source.GetSpriteAsync(spriteKey, (sprite) =>
+                        yield return dialog.source.GetSpriteAsync(spriteKey, (sprite) =>
                         {
-                            dialog.foreground.SetSprite(sprite);
-                            dialog.foreground.SetPosition(position);
-                            dialog.foreground.SetScale(scale);
+                            dialog.GetForeground().SetSprite(sprite);
+                            dialog.GetForeground().SetPosition(position);
+                            dialog.GetForeground().SetScale(scale);
                         });
                     }
                     else
                     {
-                        yield return DialogueManager.Source.GetSpriteAsync(spriteKey, (sprite) =>
+                        yield return dialog.source.GetSpriteAsync(spriteKey, (sprite) =>
                         {
-                            dialog.background.SetSprite(sprite);
-                            dialog.background.SetPosition(position);
-                            dialog.background.SetScale(scale);
+                            dialog.GetBackground().SetSprite(sprite);
+                            dialog.GetBackground().SetPosition(position);
+                            dialog.GetBackground().SetScale(scale);
                         });
                     }
                     break;
                 case 3: // bgshow, fgshow
                     if (isForeground)
-                        dialog.foreground.Show();
+                        dialog.GetForeground().Show();
                     else
-                        dialog.background.Show();
+                        dialog.GetBackground().Show();
                     break;
                 case 4: // bghide, fghide
                     if (isForeground)
-                        dialog.foreground.Hide();
+                        dialog.GetForeground().Hide();
                     else
-                        dialog.background.Hide();
+                        dialog.GetBackground().Hide();
                     break;
                 case 5: // bgfadein, fgfadein
                     if (shouldWait)
-                        yield return isForeground ? dialog.foreground.FadeIn(duration) : dialog.background.FadeIn(duration);
+                        yield return isForeground ? dialog.GetForeground().FadeIn(duration) : dialog.GetBackground().FadeIn(duration);
                     else
-                        dialog.StartCoroutine(isForeground ? dialog.foreground.FadeIn(duration) : dialog.background.FadeIn(duration));
+                        dialog.StartCoroutine(isForeground ? dialog.GetForeground().FadeIn(duration) : dialog.GetBackground().FadeIn(duration));
                     break;
                 case 6: // bgfadeout, fgfadeout
                     if (shouldWait)
-                        yield return isForeground ? dialog.foreground.FadeOut(duration) : dialog.background.FadeOut(duration);
+                        yield return isForeground ? dialog.GetForeground().FadeOut(duration) : dialog.GetBackground().FadeOut(duration);
                     else
-                        dialog.StartCoroutine(isForeground ? dialog.foreground.FadeOut(duration) : dialog.background.FadeOut(duration));
+                        dialog.StartCoroutine(isForeground ? dialog.GetForeground().FadeOut(duration) : dialog.GetBackground().FadeOut(duration));
                     break;
                 case 7: // bgcrossfade, fgcrossfade
                     Sprite sprite_7 = null;
-                    yield return DialogueManager.Source.GetSpriteAsync(spriteKey, sprite => { sprite_7 = sprite; });
+                    yield return dialog.source.GetSpriteAsync(spriteKey, sprite => { sprite_7 = sprite; });
 
                     if (shouldWait)
                         yield return isForeground
-                            ? dialog.foreground.CrossFade(sprite_7, duration)
-                            : dialog.background.CrossFade(sprite_7, duration);
+                            ? dialog.GetForeground().CrossFade(sprite_7, duration)
+                            : dialog.GetBackground().CrossFade(sprite_7, duration);
                     else
                         dialog.StartCoroutine(isForeground
-                            ? dialog.foreground.CrossFade(sprite_7, duration)
-                            : dialog.background.CrossFade(sprite_7, duration));
+                            ? dialog.GetForeground().CrossFade(sprite_7, duration)
+                            : dialog.GetBackground().CrossFade(sprite_7, duration));
                     break;
                 case 8: // bgmove, fgmove
                     if (shouldWait)
-                        yield return isForeground ? dialog.foreground.Move(position, duration) : dialog.background.Move(position, duration);
+                        yield return isForeground ? dialog.GetForeground().Move(position, duration) : dialog.GetBackground().Move(position, duration);
                     else
-                        dialog.StartCoroutine(isForeground ? dialog.foreground.Move(position, duration) : dialog.background.Move(position, duration));
+                        dialog.StartCoroutine(isForeground ? dialog.GetForeground().Move(position, duration) : dialog.GetBackground().Move(position, duration));
                     break;
                 case 9: // bgscale, fgscale
                     if (shouldWait)
-                        yield return isForeground ? dialog.foreground.Scale(scale, duration) : dialog.background.Scale(scale, duration);
+                        yield return isForeground ? dialog.GetForeground().Scale(scale, duration) : dialog.GetBackground().Scale(scale, duration);
                     else
-                        dialog.StartCoroutine(isForeground ? dialog.foreground.Scale(scale, duration) : dialog.background.Scale(scale, duration));
+                        dialog.StartCoroutine(isForeground ? dialog.GetForeground().Scale(scale, duration) : dialog.GetBackground().Scale(scale, duration));
                     break;
             }
             yield break;
@@ -351,10 +351,10 @@ namespace Nabuki
                     dialog.dialogueIndex = -1;
                     yield break;
                 case 3: // play music
-                    dialog.audio.PlayBGM(musicKey);
+                    dialog.PlayBGM(musicKey);
                     yield break;
                 case 4: // play sound effect
-                    dialog.audio.PlaySE(musicKey);
+                    dialog.PlaySE(musicKey);
                     yield break;
                 case 5: // waitfor
                     yield return new WaitForSeconds(duration);

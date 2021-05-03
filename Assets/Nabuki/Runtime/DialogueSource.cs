@@ -17,14 +17,21 @@ namespace Nabuki
 #endif
     }
 
+    [Serializable]
     public class DialogueSource
     {
-        public readonly DialogueSourceType sourceType;
+        public DialogueSourceType sourceType;
         public string imagePath, soundPath, objectPath;
         public AssetBundle imageBundle, soundBundle, objectBundle;
 
         Dictionary<string, Sprite> spriteDic;
         Dictionary<string, AudioClip> audioDic;
+
+        public DialogueSource()
+        {
+            spriteDic = new Dictionary<string, Sprite>();
+            audioDic = new Dictionary<string, AudioClip>();
+        }
 
         public DialogueSource(DialogueSourceType type)
         {

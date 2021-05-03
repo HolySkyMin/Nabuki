@@ -11,6 +11,25 @@ namespace Nabuki
         //bool ifExist;
         //DialogueDataCondition ifData;
         //int ifIndex;
+        DialogueManager manager;
+        Dictionary<string, Func<NbkTokenizer, IDialogue>> customSyntax;
+
+        public DialogueParser(DialogueManager target)
+        {
+            manager = target;
+            customSyntax = new Dictionary<string, Func<NbkTokenizer, IDialogue>>();
+        }
+
+        public DialogueParser(DialogueManager target, Dictionary<string, Func<NbkTokenizer, IDialogue>> syntaxPack)
+        {
+            manager = target;
+            customSyntax = syntaxPack;
+        }
+
+        public void AddCustomSyntax(string command, Func<NbkTokenizer, IDialogue> function)
+        {
+            customSyntax.Add(command, function);
+        }
 
         public Dictionary<int, List<IDialogue>> Parse(string script)
         {
@@ -31,6 +50,11 @@ namespace Nabuki
                 catch (Exception e) { throw new NbkDialogueParseException(line, e); }
             }
             return data;
+        }
+
+        public List<IDialogue> Interpret()
+        {
+            return null;
         }
 
         void ParseLine(ref Dictionary<int, List<IDialogue>> data, ref int phase, string line)
@@ -88,7 +112,7 @@ namespace Nabuki
 
                     case "define":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
-                        DialogueManager.CreateVariable(param[0].content, param[1].content);
+                        manager.data.CreateVariable(param[0].content, param[1].content);
                         return;
                     case "set":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
@@ -362,8 +386,8 @@ namespace Nabuki
 
                     case "": return;
                     default:
-                        if (DialogueManager.Now.customSyntax.ContainsKey(command.content))
-                            newCommand = DialogueManager.Now.customSyntax[command.content](tokenizer);
+                        if (customSyntax.ContainsKey(command.content))
+                            newCommand = customSyntax[command.content](tokenizer);
                         else
                             return;
                         break;
@@ -406,7 +430,7 @@ namespace Nabuki
                     default:
                         throw new NbkWrongSyntaxException("Invalid compare operator.");
                 }
-                condSet.conditions.Add(new NbkCondition(left, right, comp));
+                condSet.conditions.Add(new NbkCondition(manager, left, right, comp));
                 i += 3;
 
                 if (i >= command.Length)
