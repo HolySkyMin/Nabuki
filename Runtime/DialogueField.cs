@@ -31,7 +31,7 @@ namespace Nabuki
         {
             if (resident.ContainsKey(index))
             {
-                manager.characters[resident[index]].Hide();
+                manager.GetCharacter(resident[index]).Hide();
                 resident[index] = character;
             }
             else

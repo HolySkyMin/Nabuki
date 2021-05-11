@@ -168,8 +168,8 @@ namespace Nabuki
 
         public void Link()
         {
-            left = manager.data.GetVariable(leftKey);
-            try { right = manager.data.GetVariable(rightKey); }
+            left = manager.GetData().GetVariable(leftKey);
+            try { right = manager.GetData().GetVariable(rightKey); }
             catch { right = new NbkVariable("hotvalue", rightKey); }
 
             if (left.type != right.type)

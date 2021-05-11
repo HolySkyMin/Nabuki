@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using NaughtyAttributes;
 
 namespace Nabuki
 {
@@ -10,93 +11,146 @@ namespace Nabuki
         public bool Ended { get; private set; }
         public int Phase { get { return phase; } }
 
+        #region Script Configuration Flags
+
+        [BoxGroup("Script support information")]
+        [Label("Character")]
+        public bool supportsCharacter;
+        [BoxGroup("Script support information")]
+        [Label("Character Field")]
+        [ShowIf("supportsCharacter")]
+        public bool supportsCharacterField;
+        [BoxGroup("Script support information")]
+        [Label("Selection")]
+        public bool supportsSelection;
+        [BoxGroup("Script support information")]
+        [Label("Effect")]
+        public bool supportsEffect;
+        [BoxGroup("Script support information")]
+        [Label("CG Walls")]
+        public bool supportsCGWall;
+        [BoxGroup("Script support information")]
+        [Label("Variable")]
+        public bool supportsVariable;
+        [BoxGroup("Script support information")]
+        [Label("Audio")]
+        public bool supportsAudio;
+        [BoxGroup("Script support information")]
+        [Label("External Function")]
+        public bool supportsExternalFunctions;
+
+        #endregion
+
+        [Header("Universal Components")]
         public DialogueSource source;
-        public DialogueCharacter characterTemplate;
-        public DialogueField characterField;
-        public DialogueField effectField;
         public DialogueDisplayer displayer;
-        public DialogueProceeder proceeder;
-        public DialogueSelector selector;
-        public DialogueLogger logger;
-        public new DialogueAudio audio;
-
-        [Header("Dialogue Setting")]
         public bool enableLog;
-        public bool supportsBackground;
-        public bool supportsForeground;
-
-        [HideInInspector] public NbkData data;
-        [HideInInspector] public Dictionary<string, DialogueCharacter> characters;
-        [HideInInspector] public Dictionary<string, System.Action> externalAction;
-        [HideInInspector] public Dictionary<string, System.Func<NbkTokenizer, IDialogue>> customSyntax;
+        [ShowIf("enableLog")]
+        public DialogueLogger logger;
 
         internal int phase, dialogueIndex;
 
-        private void Awake()
+        protected virtual void Awake()
         {
-            // Initialize
-            characters = new Dictionary<string, DialogueCharacter>();
-            externalAction = new Dictionary<string, System.Action>();
-            customSyntax = new Dictionary<string, System.Func<NbkTokenizer, IDialogue>>();
             Ended = false;
             phase = 0;
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             source.Dispose();
         }
 
         // ================
 
-        public void AddCharacter(string key, string cname, int fieldIndex)
+        public virtual void AddCharacter(string key, string cname, int fieldIndex)
         {
-            if (characters.ContainsKey(key))
-                Debug.Log($"From Nabuki: Character {key} already exists.");
-            else
-            {
-                var newCharacter = Instantiate(characterTemplate);
-                newCharacter.Set(key, cname, characterField, fieldIndex);
-                newCharacter.name = "Character: " + key;
-                newCharacter.gameObject.SetActive(true);
-                characters.Add(key, newCharacter);
-            }
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports character, but AddCharacter is not implemented.");
         }
 
-        public bool CharacterExists(string key)
+        public virtual bool CharacterExists(string key)
         {
-            foreach (var character in characters)
-                if (character.Key == key)
-                    return true;
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports character, but CharacterExists is not implemented.");
             return false;
         }
 
-        public bool FindCharacterName(string key, out string cname)
+        public virtual bool FindCharacterName(string key, out string cname)
         {
-            foreach (var character in characters)
-            {
-                if (character.Key == key)
-                {
-                    cname = character.Value.charaName;
-                    return true;
-                }
-            }
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports character, but FindCharacterName is not implemented.");
             cname = "";
             return false;
         }
 
-        public bool FindCharacterKey(string cname, out string key)
+        public virtual bool FindCharacterKey(string cname, out string key)
         {
-            foreach(var character in characters)
-            {
-                if(character.Value.charaName == cname)
-                {
-                    key = character.Key;
-                    return true;
-                }
-            }
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports character, but FindCharacterKey is not implemented.");
             key = "";
             return false;
+        }
+
+        public virtual DialogueCharacter GetCharacter(string key)
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports character field, but GetCharacter is not implemented.");
+            return null;
+        }
+
+        public virtual IEnumerator PlayEffect(string effect)
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports effect, but PlayEffect is not implemented.");
+            yield break;
+        }
+
+        public virtual DialogueSelector GetSelector()
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports selection, but GetSelector is not implemented.");
+            return null;
+        }
+
+        public virtual DialogueBackground GetBackground()
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports CG walls, but GetBackground is not implemented.");
+            return null;
+        }
+
+        public virtual DialogueBackground GetForeground()
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports CG walls, but GetForeground is not implemented.");
+            return null;
+        }
+
+        public virtual IEnumerator SceneFadeIn(float time)
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports CG walls, but SceneFadeIn is not implemented.");
+            yield break;
+        }
+
+        public virtual IEnumerator SceneFadeOut(float time)
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports CG walls, but SceneFadeOut is not implemented.");
+            yield break;
+        }
+
+        public virtual NbkData GetData()
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports variable, but GetData is not implemented.");
+            return null;
+        }
+
+        public virtual DialogueAudio GetAudio()
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports audio, but GetAudio is not implemented.");
+            return null;
+        }
+
+        public virtual void AssignAction(string key, System.Func<IEnumerator> action)
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports external action, but AssignAction is not implemented.");
+        }
+
+        public virtual IEnumerator CallAction(string key)
+        {
+            Debug.LogError($"[Nabuki] DialogueManager ({gameObject.name}) supports external action, but CallAction is not implemented.");
+            yield break;
         }
 
         public void Play(string script)
@@ -116,18 +170,10 @@ namespace Nabuki
             Ended = true;
         }
 
-        public void PlayBGM(string key) => audio.PlayBGM(key, source);
+        public void PlayBGM(string key) => GetAudio().PlayBGM(key, source);
 
-        public void PlayVoice(string key) => audio.PlayVoice(key, source);
+        public void PlayVoice(string key) => GetAudio().PlayVoice(key, source);
 
-        public void PlaySE(string key) => audio.PlaySE(key, source);
-
-        public virtual DialogueBackground GetBackground() { return null; }
-
-        public virtual DialogueBackground GetForeground() { return null; }
-
-        public virtual IEnumerator SceneFadeIn(float time) { yield break; }
-
-        public virtual IEnumerator SceneFadeOut(float time) { yield break; }
+        public void PlaySE(string key) => GetAudio().PlaySE(key, source);
     }
 }

@@ -4,7 +4,7 @@ using System.IO;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
 
-namespace Nabuki
+namespace Nabuki.Editor
 {
     [ScriptedImporter(1, "tsv")]
     public class TSVImporter : ScriptedImporter
