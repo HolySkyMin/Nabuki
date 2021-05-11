@@ -1261,6 +1261,7 @@ MonoBehaviour:
   manager: {fileID: 4535287658809160379}
   animateText: 1
   cps: 30
+  proceeder: {fileID: 4535287657911267070}
   nameText: {fileID: 4535287659291621139}
   bodyText: {fileID: 4535287659641728070}
   nameTag: {fileID: 4535287659500491429}
@@ -1370,6 +1371,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe1e2cacd8512462d9da3861bc343186, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  supportsCharacter: 1
+  supportsCharacterField: 1
+  supportsSelection: 1
+  supportsEffect: 1
+  supportsCGWall: 1
+  supportsVariable: 1
+  supportsAudio: 1
+  supportsExternalFunctions: 1
   source:
     sourceType: 0
     imagePath: Images/
@@ -1378,22 +1387,19 @@ MonoBehaviour:
     imageBundle: {fileID: 0}
     soundBundle: {fileID: 0}
     objectBundle: {fileID: 0}
+  displayer: {fileID: 4535287658606293619}
+  enableLog: 1
+  logger: {fileID: 4535287659381517446}
+  selector: {fileID: 4535287659542193426}
   characterTemplate: {fileID: 4535287659026490320}
   characterField: {fileID: 4535287659481650220}
   effectField: {fileID: 4535287658982625464}
-  displayer: {fileID: 4535287658606293619}
-  proceeder: {fileID: 4535287657911267070}
-  selector: {fileID: 4535287659542193426}
-  logger: {fileID: 4535287659381517446}
   audio: {fileID: 4535287659306264855}
-  enableLog: 1
-  supportsBackground: 1
-  supportsForeground: 1
-  data:
-    playerName: 
   background: {fileID: 4535287658056172140}
   foreground: {fileID: 4535287658683558413}
   sceneDimmer: {fileID: 4535287658899034607}
+  data:
+    playerName: 
 --- !u!1 &4535287658899034604
 GameObject:
   m_ObjectHideFlags: 0
@@ -3607,6 +3613,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   manager: {fileID: 4535287658809160379}
+  proceeder: {fileID: 4535287657911267070}
   buttonTemplate: {fileID: 4535287659056629462}
   buttonParent: {fileID: 4535287659652123418}
   hasResult: 0

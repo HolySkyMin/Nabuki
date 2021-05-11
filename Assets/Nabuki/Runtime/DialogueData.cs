@@ -25,47 +25,54 @@ namespace Nabuki
 
         public IEnumerator Run(DialogueManager dialog)
         {
-            string realTalker;
+            string realTalker = talker;
             switch(talker)
             {
                 case "player":
                     isPlayer = true;
-                    realTalker = dialog.data.playerName;
+                    if (dialog.supportsVariable)
+                        realTalker = dialog.GetData().playerName;
                     break;
                 case "none":
                     realTalker = "";
                     break;
                 default:
-                    var registered = dialog.FindCharacterName(talker, out realTalker);
-                    if (!registered)
-                        realTalker = talker;
-                    if (hideName)
-                        realTalker = "???";
+                    if (dialog.supportsVariable)
+                    {
+                        var registered = dialog.FindCharacterName(talker, out realTalker);
+                        if (!registered)
+                            realTalker = talker;
+                        if (hideName)
+                            realTalker = "???";
+                    }
                     break;
             }
 
-            var keywords = Regex.Matches(text, @"{[\w\s]*}");
-            for(int i = 0; i < keywords.Count; i++)
+            if (dialog.supportsVariable)
             {
-                var keyword = keywords[i].Value.TrimStart('{').TrimEnd('}');
-                string valueword;
-                switch(keyword)
+                var keywords = Regex.Matches(text, @"{[\w\s]*}");
+                for (int i = 0; i < keywords.Count; i++)
                 {
-                    case "player":
-                        valueword = dialog.data.playerName; break;
-                    default:
-                        var charaRegistered = dialog.FindCharacterName(keyword, out valueword);
-                        if(!charaRegistered)
-                        {
-                            try { valueword = dialog.data.GetVariable(keyword).value; }
-                            catch { valueword = keyword; }
-                        }
-                        break;
+                    var keyword = keywords[i].Value.TrimStart('{').TrimEnd('}');
+                    string valueword;
+                    switch (keyword)
+                    {
+                        case "player":
+                            valueword = dialog.GetData().playerName; break;
+                        default:
+                            var charaRegistered = dialog.FindCharacterName(keyword, out valueword);
+                            if (!charaRegistered)
+                            {
+                                try { valueword = dialog.GetData().GetVariable(keyword).value; }
+                                catch { valueword = keyword; }
+                            }
+                            break;
+                    }
+                    text = text.Replace(keywords[i].Value, valueword);
                 }
-                text = text.Replace(keywords[i].Value, valueword);
             }
 
-            if (voiceKey != "")
+            if (voiceKey != "")  // Parser sends voice key only when does manager support audio
                 dialog.PlayVoice(voiceKey);
             if (dialog.enableLog)
                 dialog.logger.Log(realTalker, text, voiceKey, isPlayer);
@@ -75,6 +82,8 @@ namespace Nabuki
 
     public class DialogueDataSelect : IDialogue
     {
+        // Parser creates this object only when does manager support selection.
+
         public Dictionary<int, string> select;
         public bool storeInVariable;
         public string variableKey;
@@ -82,10 +91,10 @@ namespace Nabuki
 
         public IEnumerator Run(DialogueManager dialog)
         {
-            yield return dialog.selector.ShowSelect(select, result =>
+            yield return dialog.GetSelector().ShowSelect(select, result =>
             {
                 if (storeInVariable)
-                    dialog.data.SetVariable(variableKey, result.ToString());
+                    dialog.GetData().SetVariable(variableKey, result.ToString());
                 if (!dontChangePhase)
                 {
                     dialog.phase = result;
@@ -124,6 +133,7 @@ namespace Nabuki
 
     public class DialogueDataCharacter : IDialogue
     {
+        // Parser creates this object only when does manager support character.
         public int type;
         public string characterKey;
         public string spriteKey;
@@ -140,86 +150,86 @@ namespace Nabuki
                 case 0: // character
                     dialog.AddCharacter(characterKey, spriteKey, state);
                     break;
-                case 1: // setsprite
+                case 1: // setsprite, only when does manager support character field
                     var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
                     //var sprite = DialogueManager.Source.GetSprite(fileName);
                     yield return dialog.source.GetSpriteAsync(fileName, (sprite) =>
                     {
-                        dialog.characters[characterKey].image.sprite = sprite == null ? dialog.characters[characterKey].defaultSprite : sprite;
+                        dialog.GetCharacter(characterKey).image.sprite = sprite == null ? dialog.GetCharacter(characterKey).defaultSprite : sprite;
                     });
                     break;
-                case 2: // setpos
-                    dialog.characters[characterKey].SetPosition(position);
+                case 2: // setpos, only when does manager support character field
+                    dialog.GetCharacter(characterKey).SetPosition(position);
                     break;
-                case 3: // setsize
-                    dialog.characters[characterKey].body.localScale = new Vector3(scale, scale, 1);
+                case 3: // setsize, only when does manager support character field
+                    dialog.GetCharacter(characterKey).body.localScale = new Vector3(scale, scale, 1);
                     break;
-                case 4: // setstate
-                    switch(state)
+                case 4: // setstate, only when does manager support character field
+                    switch (state)
                     {
                         case 0: // active (-) - does nothing. because default state is active!
                             break;
                         case 1: // inactive
-                            dialog.characters[characterKey].image.color = new Color(0.5f, 0.5f, 0.5f, 1);
+                            dialog.GetCharacter(characterKey).image.color = new Color(0.5f, 0.5f, 0.5f, 1);
                             break;
                         case 2: // blackout
-                            dialog.characters[characterKey].image.color = new Color(0, 0, 0, 1);
+                            dialog.GetCharacter(characterKey).image.color = new Color(0, 0, 0, 1);
                             break;
                     }
                     break;
-                case 5:  // show
-                    dialog.characters[characterKey].Show();
+                case 5:  // show, only when does manager support character field
+                    dialog.GetCharacter(characterKey).Show();
                     break;
-                case 6:  // hide
-                    dialog.characters[characterKey].Hide();
+                case 6:  // hide, only when does manager support character field
+                    dialog.GetCharacter(characterKey).Hide();
                     break;
-                case 10: // move - animation index starts with 10
+                case 10: // move - animation index starts with 10, only when does manager support character field
                     if (shouldWait)
-                        yield return dialog.characters[characterKey].Move(position, duration);
+                        yield return dialog.GetCharacter(characterKey).Move(position, duration);
                     else
-                        dialog.StartCoroutine(dialog.characters[characterKey].Move(position, duration));
+                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).Move(position, duration));
                     break;
-                case 11: // scale
+                case 11: // scale, only when does manager support character field
                     if (shouldWait)
-                        yield return dialog.characters[characterKey].Scale(scale, duration);
+                        yield return dialog.GetCharacter(characterKey).Scale(scale, duration);
                     else
-                        dialog.StartCoroutine(dialog.characters[characterKey].Scale(scale, duration));
+                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).Scale(scale, duration));
                     break;
-                case 12: // fadein
+                case 12: // fadein, only when does manager support character field
                     if (shouldWait)
-                        yield return dialog.characters[characterKey].FadeIn(duration);
+                        yield return dialog.GetCharacter(characterKey).FadeIn(duration);
                     else
-                        dialog.StartCoroutine(dialog.characters[characterKey].FadeIn(duration));
+                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).FadeIn(duration));
                     break;
-                case 13: // fadeout
+                case 13: // fadeout, only when does manager support character field
                     if (shouldWait)
-                        yield return dialog.characters[characterKey].FadeOut(duration);
+                        yield return dialog.GetCharacter(characterKey).FadeOut(duration);
                     else
-                        dialog.StartCoroutine(dialog.characters[characterKey].FadeOut(duration));
+                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).FadeOut(duration));
                     break;
-                case 14: // nodup
+                case 14: // nodup, only when does manager support character field
                     if (shouldWait)
-                        yield return dialog.characters[characterKey].NodUp();
+                        yield return dialog.GetCharacter(characterKey).NodUp();
                     else
-                        dialog.StartCoroutine(dialog.characters[characterKey].NodUp());
+                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).NodUp());
                     break;
-                case 15: // noddown
+                case 15: // noddown, only when does manager support character field
                     if (shouldWait)
-                        yield return dialog.characters[characterKey].NodDown();
+                        yield return dialog.GetCharacter(characterKey).NodDown();
                     else
-                        dialog.StartCoroutine(dialog.characters[characterKey].NodDown());
+                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).NodDown());
                     break;
-                case 16: // blackout
+                case 16: // blackout, only when does manager support character field
                     if (shouldWait)
-                        yield return dialog.characters[characterKey].Blackout(duration);
+                        yield return dialog.GetCharacter(characterKey).Blackout(duration);
                     else
-                        dialog.StartCoroutine(dialog.characters[characterKey].Blackout(duration));
+                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).Blackout(duration));
                     break;
-                case 17:  // colorize
+                case 17:  // colorize, only when does manager support character field
                     if (shouldWait)
-                        yield return dialog.characters[characterKey].Colorize(duration);
+                        yield return dialog.GetCharacter(characterKey).Colorize(duration);
                     else
-                        dialog.StartCoroutine(dialog.characters[characterKey].Colorize(duration));
+                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).Colorize(duration));
                     break;
             }
             yield break;
@@ -228,6 +238,7 @@ namespace Nabuki
 
     public class DialogueDataScene : IDialogue
     {
+        // Parser creates this object only when does manager support cg walls.
         public int type;
         public string spriteKey;
         public Vector2 position;
@@ -340,20 +351,20 @@ namespace Nabuki
         {
             switch(type)
             {
-                case 0: // define variables
-                    dialog.data.CreateVariable(variableKey, value);
+                case 0: // define variables, only when does manager support variable
+                    dialog.GetData().CreateVariable(variableKey, value);
                     yield break;
-                case 1: // change variable value
-                    dialog.data.SetVariable(variableKey, value);
+                case 1: // change variable value, only when does manager support variable
+                    dialog.GetData().SetVariable(variableKey, value);
                     yield break;
                 case 2: // set next phase
                     dialog.phase = phase;
                     dialog.dialogueIndex = -1;
                     yield break;
-                case 3: // play music
+                case 3: // play music, only when does manager support audio
                     dialog.PlayBGM(musicKey);
                     yield break;
-                case 4: // play sound effect
+                case 4: // play sound effect, only when does manager support audio
                     dialog.PlaySE(musicKey);
                     yield break;
                 case 5: // waitfor

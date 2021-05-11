@@ -41,3 +41,6 @@ sysinfo.txt
 
 # Builds
 *.apk
+
+# macOS thumb file
+*.DS_Store

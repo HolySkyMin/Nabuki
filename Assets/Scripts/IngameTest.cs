@@ -6,7 +6,7 @@ using Nabuki;
 public class IngameTest : MonoBehaviour
 {
     public TextAsset dialog;
-    public DialogueManager manager;
+    public StandardDialogue manager;
 
     // Start is called before the first frame update
     IEnumerator Start()

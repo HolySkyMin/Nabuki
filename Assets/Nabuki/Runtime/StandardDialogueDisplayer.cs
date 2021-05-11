@@ -8,6 +8,7 @@ namespace Nabuki
     [RequireComponent(typeof(CanvasGroup))]
     public class StandardDialogueDisplayer : DialogueDisplayer
     {
+        public DialogueProceeder proceeder;
         public TMP_Text nameText, bodyText;
         public GameObject nameTag, endIndicator, unskipIndicator;
         public bool removeNametagWhenNull;
@@ -27,7 +28,7 @@ namespace Nabuki
             if (animateText)
             {
                 unskipIndicator.SetActive(unskippable);
-                manager.proceeder.allowInput = !unskippable;
+                proceeder.allowInput = !unskippable;
 
                 int i = 0;
                 float clock = 0f, spc = 1f / cps;
@@ -43,9 +44,9 @@ namespace Nabuki
                         bodyText.maxVisibleCharacters = i;
                     }
 
-                    if (!unskippable && manager.proceeder.hasInput)
+                    if (!unskippable && proceeder.hasInput)
                     {
-                        manager.proceeder.hasInput = false;
+                        proceeder.hasInput = false;
                         break;
                     }
 
@@ -56,9 +57,9 @@ namespace Nabuki
             }
 
             endIndicator.SetActive(true);
-            manager.proceeder.allowInput = true;
-            yield return new WaitUntil(() => manager.proceeder.hasInput);
-            manager.proceeder.hasInput = false;
+            proceeder.allowInput = true;
+            yield return new WaitUntil(() => proceeder.hasInput);
+            proceeder.hasInput = false;
             endIndicator.SetActive(false);
         }
 
