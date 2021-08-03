@@ -15,6 +15,7 @@ namespace Nabuki
         public DialogueBackground background;
         public DialogueBackground foreground;
         public SpriteRenderer sceneDimmer;
+        public DialogueEvent events;
 
         [HideInInspector] public NbkData data;
 
@@ -147,7 +148,7 @@ namespace Nabuki
 
         public override IEnumerator CallAction(string key)
         {
-            yield return actions[key].Invoke();
+            yield return events.Call(key);
         }
     }
 }
