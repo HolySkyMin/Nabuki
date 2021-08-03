@@ -1,7 +1,7 @@
 {
     "name": "com.holyskymin.nabuki",
     "displayName": "Nabuki",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "unity": "2019.1",
     "description": "Dialogue library for Unity.\n\nRequires .NET 4.x scripting runtime and API compatibility level.\n\nParallel Universe for Justice.",
     "dependencies": {
