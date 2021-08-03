@@ -1,5 +1,49 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3584164443693265249
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 198054496207839454}
+  - component: {fileID: 3476866114068599258}
+  m_Layer: 0
+  m_Name: Dialogue Event
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &198054496207839454
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3584164443693265249}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4535287658809160378}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3476866114068599258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3584164443693265249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f602407510b00407ba3ac2153ff3013e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _events: []
 --- !u!1 &4535287657730549824
 GameObject:
   m_ObjectHideFlags: 0
@@ -1355,6 +1399,7 @@ Transform:
   - {fileID: 4535287658899034606}
   - {fileID: 4535287659026490323}
   - {fileID: 4535287659306264854}
+  - {fileID: 198054496207839454}
   - {fileID: 4535287659070428676}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -1398,6 +1443,7 @@ MonoBehaviour:
   background: {fileID: 4535287658056172140}
   foreground: {fileID: 4535287658683558413}
   sceneDimmer: {fileID: 4535287658899034607}
+  events: {fileID: 3476866114068599258}
   data:
     playerName: 
 --- !u!1 &4535287658899034604
@@ -1839,7 +1885,7 @@ RectTransform:
   - {fileID: 4535287659339751919}
   - {fileID: 4535287659559553466}
   m_Father: {fileID: 4535287658809160378}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
