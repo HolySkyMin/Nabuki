@@ -4,8 +4,19 @@ using UnityEngine;
 
 namespace Nabuki
 {
-    public class StandardDialogue : DialogueManager
+    public class StandardDialogue : DialogueManager, IFeatureCharacterWithField, IFeatureSelection, IFeatureBackground,
+        IFeatureForeground, IFeatureEffect, IFeatureVariable, IFeatureAudio, IFeatureExternalAction
     {
+        public DialogueSelector Selector => selector;
+
+        public DialogueBackground Background => background;
+
+        public DialogueBackground Foreground => foreground;
+
+        public DialogueAudio Audio => audio;
+
+        public NbkData VariableData => data;
+
         [Header("Standard Dialogue Components")]
         public DialogueSelector selector;
         public DialogueCharacter characterTemplate;
@@ -22,15 +33,18 @@ namespace Nabuki
         Dictionary<string, DialogueCharacter> characters;
         Dictionary<string, System.Func<IEnumerator>> actions;
 
-        protected override void Awake()
+        protected void Awake()
         {
-            base.Awake();
-
             characters = new Dictionary<string, DialogueCharacter>();
             actions = new Dictionary<string, System.Func<IEnumerator>>();
         }
 
-        public override void AddCharacter(string key, string cname, int fieldIndex)
+        public void AddCharacter(string key, string cname)
+        {
+            AddCharacter(key, cname, 0);
+        }
+
+        public void AddCharacter(string key, string cname, int fieldIndex)
         {
             if (characters.ContainsKey(key))
                 Debug.Log($"From Nabuki: Character {key} already exists.");
@@ -44,7 +58,7 @@ namespace Nabuki
             }
         }
 
-        public override bool CharacterExists(string key)
+        public bool CharacterExists(string key)
         {
             foreach (var character in characters)
                 if (character.Key == key)
@@ -52,7 +66,7 @@ namespace Nabuki
             return false;
         }
 
-        public override bool FindCharacterName(string key, out string cname)
+        public bool FindCharacterName(string key, out string cname)
         {
             foreach (var character in characters)
             {
@@ -66,7 +80,7 @@ namespace Nabuki
             return false;
         }
 
-        public override bool FindCharacterKey(string cname, out string key)
+        public bool FindCharacterKey(string cname, out string key)
         {
             foreach (var character in characters)
             {
@@ -80,32 +94,17 @@ namespace Nabuki
             return false;
         }
 
-        public override DialogueCharacter GetCharacter(string key)
+        public DialogueCharacter GetCharacter(string key)
         {
             return characters[key];
         }
 
-        public override IEnumerator PlayEffect(string effect)
+        public IEnumerator PlayEffect(string effect)
         {
-            return base.PlayEffect(effect);
+            yield return null;
         }
 
-        public override DialogueSelector GetSelector()
-        {
-            return selector;
-        }
-
-        public override DialogueBackground GetBackground()
-        {
-            return background;
-        }
-
-        public override DialogueBackground GetForeground()
-        {
-            return foreground;
-        }
-
-        public override IEnumerator SceneFadeIn(float time)
+        public IEnumerator SceneFadeIn(float time)
         {
             sceneDimmer.color = Color.black;
             for (var clock = 0f; clock < time; clock += Time.deltaTime)
@@ -118,7 +117,7 @@ namespace Nabuki
             sceneDimmer.gameObject.SetActive(false);
         }
 
-        public override IEnumerator SceneFadeOut(float time)
+        public IEnumerator SceneFadeOut(float time)
         {
             sceneDimmer.color = Color.clear;
             sceneDimmer.gameObject.SetActive(true);
@@ -131,22 +130,27 @@ namespace Nabuki
             sceneDimmer.color = Color.black;
         }
 
-        public override NbkData GetData()
+        public void PlayBGM(string key)
         {
-            return data;
+
         }
 
-        public override DialogueAudio GetAudio()
+        public void PlaySE(string key)
         {
-            return audio;
+
         }
 
-        public override void AssignAction(string key, System.Func<IEnumerator> action)
+        public void PlayVoice(string key)
+        {
+
+        }
+
+        public void AssignAction(string key, System.Func<IEnumerator> action)
         {
             actions.Add(key, action);
         }
 
-        public override IEnumerator CallAction(string key)
+        public IEnumerator CallAction(string key)
         {
             yield return events.Call(key);
         }

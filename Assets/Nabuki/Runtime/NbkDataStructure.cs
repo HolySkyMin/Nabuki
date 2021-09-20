@@ -153,14 +153,15 @@ namespace Nabuki
 
     public class NbkCondition
     {
-        DialogueManager manager;
+        IFeatureVariable manager;
         NbkVariable left;
         NbkVariable right;
         string leftKey, rightKey;
         NbkCompareType compare;
 
-        public NbkCondition(DialogueManager target, string l, string r, NbkCompareType c)
+        public NbkCondition(IFeatureVariable target, string l, string r, NbkCompareType c)
         {
+            manager = target;
             leftKey = l;
             rightKey = r;
             compare = c;
@@ -168,8 +169,8 @@ namespace Nabuki
 
         public void Link()
         {
-            left = manager.GetData().GetVariable(leftKey);
-            try { right = manager.GetData().GetVariable(rightKey); }
+            left = manager.VariableData.GetVariable(leftKey);
+            try { right = manager.VariableData.GetVariable(rightKey); }
             catch { right = new NbkVariable("hotvalue", rightKey); }
 
             if (left.type != right.type)

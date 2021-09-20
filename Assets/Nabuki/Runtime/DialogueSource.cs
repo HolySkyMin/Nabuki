@@ -20,9 +20,9 @@ namespace Nabuki
     [Serializable]
     public class DialogueSource
     {
-        public DialogueSourceType sourceType;
-        public string imagePath, soundPath, objectPath;
-        public AssetBundle imageBundle, soundBundle, objectBundle;
+        [SerializeField] DialogueSourceType sourceType;
+        [SerializeField] string dialoguePath, imagePath, soundPath, objectPath;
+        [SerializeField] AssetBundle dialogueBundle, imageBundle, soundBundle, objectBundle;
 
         Dictionary<string, Sprite> spriteDic;
         Dictionary<string, AudioClip> audioDic;
@@ -33,34 +33,44 @@ namespace Nabuki
             audioDic = new Dictionary<string, AudioClip>();
         }
 
-        public DialogueSource(DialogueSourceType type)
+        public string GetDialogue(string key)
         {
-            sourceType = type;
-
-            spriteDic = new Dictionary<string, Sprite>();
-            audioDic = new Dictionary<string, AudioClip>();
+            switch (sourceType)
+            {
+                case DialogueSourceType.Resources:
+                    return Resources.Load<TextAsset>(Path.Combine(dialoguePath, key).Replace("\\", "/")).text;
+                case DialogueSourceType.AssetBundle:
+                    return dialogueBundle.LoadAsset<TextAsset>(key).text;
+                default:
+                    return null;
+            }
         }
 
-        public DialogueSource(string ip, string sp, string op, DialogueSourceType type = DialogueSourceType.Resources)
+        public IEnumerator GetDialogueAsync(string key, Action<string> callback)
         {
-            imagePath = ip;
-            soundPath = sp;
-            objectPath = op;
-            sourceType = type;
-
-            spriteDic = new Dictionary<string, Sprite>();
-            audioDic = new Dictionary<string, AudioClip>();
-        }
-
-        public DialogueSource(AssetBundle ib, AssetBundle sb, AssetBundle ob)
-        {
-            imageBundle = ib;
-            soundBundle = sb;
-            objectBundle = ob;
-            sourceType = DialogueSourceType.AssetBundle;
-
-            spriteDic = new Dictionary<string, Sprite>();
-            audioDic = new Dictionary<string, AudioClip>();
+            switch(sourceType)
+            {
+                case DialogueSourceType.Resources:
+                    var progress = Resources.LoadAsync<TextAsset>(Path.Combine(dialoguePath, key).Replace("\\", "/"));
+                    yield return new WaitUntil(() => progress.isDone);
+                    var ta = progress.asset as TextAsset;
+                    callback(ta.text);
+                    break;
+                case DialogueSourceType.AssetBundle:
+                    var progress2 = dialogueBundle.LoadAssetAsync<TextAsset>(key);
+                    yield return new WaitUntil(() => progress2.isDone);
+                    var ta2 = progress2.asset as TextAsset;
+                    callback(ta2.text);
+                    break;
+#if ADDRESSABLE_EXISTS
+                case DialogueSourceType.Addressable:
+                    var progress3 = Addressables.LoadAssetAsync<TextAsset>(Path.Combine(dialoguePath, key).Replace("\\", "/"));
+                    yield return new WaitUntil(() => progress3.IsDone);
+                    callback(progress3.Result.text);
+                    Addressables.Release(progress3);
+                    break;
+#endif
+            }
         }
 
         public Sprite GetSprite(string key)

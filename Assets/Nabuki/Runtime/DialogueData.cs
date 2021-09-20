@@ -6,12 +6,7 @@ using UnityEngine;
 
 namespace Nabuki
 {
-    public interface IDialogue
-    {
-        IEnumerator Run(DialogueManager dialog);
-    }
-
-    public class DialogueData : IDialogue
+    public class DialogueData : IDialogueData
     {
         public bool isPlayer;
         public string talker;
@@ -23,23 +18,23 @@ namespace Nabuki
         public bool unstoppable;
         public bool hideName;
 
-        public IEnumerator Run(DialogueManager dialog)
+        public IEnumerator Execute(DialogueManager dialog)
         {
             string realTalker = talker;
             switch(talker)
             {
                 case "player":
                     isPlayer = true;
-                    if (dialog.supportsVariable)
-                        realTalker = dialog.GetData().playerName;
+                    if (dialog is IFeatureVariable fVariableLocal)
+                        realTalker = fVariableLocal.VariableData.playerName;
                     break;
                 case "none":
                     realTalker = "";
                     break;
                 default:
-                    if (dialog.supportsVariable)
+                    if (dialog is IFeatureCharacter fCharacter)
                     {
-                        var registered = dialog.FindCharacterName(talker, out realTalker);
+                        var registered = fCharacter.FindCharacterName(talker, out realTalker);
                         if (!registered)
                             realTalker = talker;
                         if (hideName)
@@ -48,7 +43,7 @@ namespace Nabuki
                     break;
             }
 
-            if (dialog.supportsVariable)
+            if (dialog is IFeatureVariable fVariable)
             {
                 var keywords = Regex.Matches(text, @"{[\w\s]*}");
                 for (int i = 0; i < keywords.Count; i++)
@@ -58,12 +53,13 @@ namespace Nabuki
                     switch (keyword)
                     {
                         case "player":
-                            valueword = dialog.GetData().playerName; break;
+                            valueword = fVariable.VariableData.playerName; break;
                         default:
-                            var charaRegistered = dialog.FindCharacterName(keyword, out valueword);
-                            if (!charaRegistered)
+                            if (dialog is IFeatureCharacter fCharacter && fCharacter.FindCharacterName(keyword, out valueword))
+                                break;
+                            else
                             {
-                                try { valueword = dialog.GetData().GetVariable(keyword).value; }
+                                try { valueword = fVariable.VariableData.GetVariable(keyword).value; }
                                 catch { valueword = keyword; }
                             }
                             break;
@@ -72,15 +68,16 @@ namespace Nabuki
                 }
             }
 
-            if (voiceKey != "")  // Parser sends voice key only when does manager support audio
-                dialog.PlayVoice(voiceKey);
+            if (dialog is IFeatureAudio fAudio && voiceKey != "")  // Parser sends voice key only when does manager support audio
+                fAudio.PlayVoice(voiceKey);
+
             if (dialog.enableLog)
                 dialog.logger.Log(realTalker, text, voiceKey, isPlayer);
             yield return dialog.displayer.ShowText(realTalker, text, displayIndex, unstoppable);
         }
     }
 
-    public class DialogueDataSelect : IDialogue
+    public class DialogueDataSelect : IDialogueData
     {
         // Parser creates this object only when does manager support selection.
 
@@ -89,29 +86,29 @@ namespace Nabuki
         public string variableKey;
         public bool dontChangePhase;
 
-        public IEnumerator Run(DialogueManager dialog)
+        public IEnumerator Execute(DialogueManager dialog)
         {
-            yield return dialog.GetSelector().ShowSelect(select, result =>
+            if(dialog is IFeatureSelection fSelection)
             {
-                if (storeInVariable)
-                    dialog.GetData().SetVariable(variableKey, result.ToString());
-                if (!dontChangePhase)
+                yield return fSelection.Selector.ShowSelect(select, result =>
                 {
-                    dialog.phase = result;
-                    dialog.dialogueIndex = -1;
-                }
-            });
+                    if (dialog is IFeatureVariable fVariable && storeInVariable)
+                        fVariable.VariableData.SetVariable(variableKey, result.ToString());
+                    if (!dontChangePhase)
+                        dialog.SetPhase(result);
+                });
+            }
         }
     }
 
-    public class DialogueDataCondition : IDialogue
+    public class DialogueDataCondition : IDialogueData
     {
-        public List<List<IDialogue>> conditions;
+        public List<List<IDialogueData>> conditions;
         public List<NbkConditionSet> states;
 
         int available = -1;
 
-        public IEnumerator Run(DialogueManager dialog)
+        public IEnumerator Execute(DialogueManager dialog)
         {
             for(int i = 0; i < states.Count; i++)
             {
@@ -127,11 +124,11 @@ namespace Nabuki
                 yield break;
 
             for (int i = 0; i < conditions[available].Count; i++)
-                yield return conditions[available][i].Run(dialog);
+                yield return conditions[available][i].Execute(dialog);
         }
     }
 
-    public class DialogueDataCharacter : IDialogue
+    public class DialogueDataCharacter : IDialogueData
     {
         // Parser creates this object only when does manager support character.
         public int type;
@@ -143,100 +140,103 @@ namespace Nabuki
         public int state;
         public bool shouldWait;
 
-        public IEnumerator Run(DialogueManager dialog)
+        public IEnumerator Execute(DialogueManager dialog)
         {
-            switch(type)
+            if (dialog is IFeatureCharacterWithField fCharacter)
             {
-                case 0: // character
-                    dialog.AddCharacter(characterKey, spriteKey, state);
-                    break;
-                case 1: // setsprite, only when does manager support character field
-                    var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
-                    //var sprite = DialogueManager.Source.GetSprite(fileName);
-                    yield return dialog.source.GetSpriteAsync(fileName, (sprite) =>
-                    {
-                        dialog.GetCharacter(characterKey).image.sprite = sprite == null ? dialog.GetCharacter(characterKey).defaultSprite : sprite;
-                    });
-                    break;
-                case 2: // setpos, only when does manager support character field
-                    dialog.GetCharacter(characterKey).SetPosition(position);
-                    break;
-                case 3: // setsize, only when does manager support character field
-                    dialog.GetCharacter(characterKey).body.localScale = new Vector3(scale, scale, 1);
-                    break;
-                case 4: // setstate, only when does manager support character field
-                    switch (state)
-                    {
-                        case 0: // active (-) - does nothing. because default state is active!
-                            break;
-                        case 1: // inactive
-                            dialog.GetCharacter(characterKey).image.color = new Color(0.5f, 0.5f, 0.5f, 1);
-                            break;
-                        case 2: // blackout
-                            dialog.GetCharacter(characterKey).image.color = new Color(0, 0, 0, 1);
-                            break;
-                    }
-                    break;
-                case 5:  // show, only when does manager support character field
-                    dialog.GetCharacter(characterKey).Show();
-                    break;
-                case 6:  // hide, only when does manager support character field
-                    dialog.GetCharacter(characterKey).Hide();
-                    break;
-                case 10: // move - animation index starts with 10, only when does manager support character field
-                    if (shouldWait)
-                        yield return dialog.GetCharacter(characterKey).Move(position, duration);
-                    else
-                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).Move(position, duration));
-                    break;
-                case 11: // scale, only when does manager support character field
-                    if (shouldWait)
-                        yield return dialog.GetCharacter(characterKey).Scale(scale, duration);
-                    else
-                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).Scale(scale, duration));
-                    break;
-                case 12: // fadein, only when does manager support character field
-                    if (shouldWait)
-                        yield return dialog.GetCharacter(characterKey).FadeIn(duration);
-                    else
-                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).FadeIn(duration));
-                    break;
-                case 13: // fadeout, only when does manager support character field
-                    if (shouldWait)
-                        yield return dialog.GetCharacter(characterKey).FadeOut(duration);
-                    else
-                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).FadeOut(duration));
-                    break;
-                case 14: // nodup, only when does manager support character field
-                    if (shouldWait)
-                        yield return dialog.GetCharacter(characterKey).NodUp();
-                    else
-                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).NodUp());
-                    break;
-                case 15: // noddown, only when does manager support character field
-                    if (shouldWait)
-                        yield return dialog.GetCharacter(characterKey).NodDown();
-                    else
-                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).NodDown());
-                    break;
-                case 16: // blackout, only when does manager support character field
-                    if (shouldWait)
-                        yield return dialog.GetCharacter(characterKey).Blackout(duration);
-                    else
-                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).Blackout(duration));
-                    break;
-                case 17:  // colorize, only when does manager support character field
-                    if (shouldWait)
-                        yield return dialog.GetCharacter(characterKey).Colorize(duration);
-                    else
-                        dialog.StartCoroutine(dialog.GetCharacter(characterKey).Colorize(duration));
-                    break;
+                switch (type)
+                {
+                    case 0: // character
+                        fCharacter.AddCharacter(characterKey, spriteKey, state);
+                        break;
+                    case 1: // setsprite, only when does manager support character field
+                        var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
+                        yield return dialog.source.GetSpriteAsync(fileName, (sprite) =>
+                        {
+                            fCharacter.GetCharacter(characterKey).image.sprite = sprite == null ? fCharacter.GetCharacter(characterKey).defaultSprite : sprite;
+                        });
+                        break;
+                    case 2: // setpos, only when does manager support character field
+                        fCharacter.GetCharacter(characterKey).SetPosition(position);
+                        break;
+                    case 3: // setsize, only when does manager support character field
+                        fCharacter.GetCharacter(characterKey).body.localScale = new Vector3(scale, scale, 1);
+                        break;
+                    case 4: // setstate, only when does manager support character field
+                        switch (state)
+                        {
+                            case 0: // active (-) - does nothing. because default state is active!
+                                break;
+                            case 1: // inactive
+                                fCharacter.GetCharacter(characterKey).image.color = new Color(0.5f, 0.5f, 0.5f, 1);
+                                break;
+                            case 2: // blackout
+                                fCharacter.GetCharacter(characterKey).image.color = new Color(0, 0, 0, 1);
+                                break;
+                        }
+                        break;
+                    case 5:  // show, only when does manager support character field
+                        fCharacter.GetCharacter(characterKey).Show();
+                        break;
+                    case 6:  // hide, only when does manager support character field
+                        fCharacter.GetCharacter(characterKey).Hide();
+                        break;
+                    case 10: // move - animation index starts with 10, only when does manager support character field
+                        if (shouldWait)
+                            yield return fCharacter.GetCharacter(characterKey).Move(position, duration);
+                        else
+                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).Move(position, duration));
+                        break;
+                    case 11: // scale, only when does manager support character field
+                        if (shouldWait)
+                            yield return fCharacter.GetCharacter(characterKey).Scale(scale, duration);
+                        else
+                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).Scale(scale, duration));
+                        break;
+                    case 12: // fadein, only when does manager support character field
+                        if (shouldWait)
+                            yield return fCharacter.GetCharacter(characterKey).FadeIn(duration);
+                        else
+                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).FadeIn(duration));
+                        break;
+                    case 13: // fadeout, only when does manager support character field
+                        if (shouldWait)
+                            yield return fCharacter.GetCharacter(characterKey).FadeOut(duration);
+                        else
+                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).FadeOut(duration));
+                        break;
+                    case 14: // nodup, only when does manager support character field
+                        if (shouldWait)
+                            yield return fCharacter.GetCharacter(characterKey).NodUp();
+                        else
+                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).NodUp());
+                        break;
+                    case 15: // noddown, only when does manager support character field
+                        if (shouldWait)
+                            yield return fCharacter.GetCharacter(characterKey).NodDown();
+                        else
+                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).NodDown());
+                        break;
+                    case 16: // blackout, only when does manager support character field
+                        if (shouldWait)
+                            yield return fCharacter.GetCharacter(characterKey).Blackout(duration);
+                        else
+                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).Blackout(duration));
+                        break;
+                    case 17:  // colorize, only when does manager support character field
+                        if (shouldWait)
+                            yield return fCharacter.GetCharacter(characterKey).Colorize(duration);
+                        else
+                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).Colorize(duration));
+                        break;
+                }
             }
+            
             yield break;
         }
     }
 
-    public class DialogueDataScene : IDialogue
+    public class DialogueDataScene : IDialogueData
     {
         // Parser creates this object only when does manager support cg walls.
         public int type;
@@ -247,97 +247,122 @@ namespace Nabuki
         public bool shouldWait;
         public bool isForeground;
 
-        public IEnumerator Run(DialogueManager dialog)
+        public IEnumerator Execute(DialogueManager dialog)
         {
             switch(type)
             {
-                case 0:  // scenefadein
+                case 0 when dialog is IFeatureTransition fTransition:  // scenefadein
                     if (shouldWait)
-                        yield return dialog.SceneFadeIn(duration);
+                        yield return fTransition.SceneFadeIn(duration);
                     else
-                        dialog.StartCoroutine(dialog.SceneFadeIn(duration));
+                        dialog.StartCoroutine(fTransition.SceneFadeIn(duration));
                     break;
-                case 1: // scenefadeout
+                case 1 when dialog is IFeatureTransition fTransition: // scenefadeout
                     if (shouldWait)
-                        yield return dialog.SceneFadeOut(duration);
+                        yield return fTransition.SceneFadeOut(duration);
                     else
-                        dialog.StartCoroutine(dialog.SceneFadeOut(duration));
+                        dialog.StartCoroutine(fTransition.SceneFadeOut(duration));
                     break;
-                case 2: // setbg, setfg
-                    if (isForeground)
+                case 2 when !isForeground && dialog is IFeatureBackground fBackground: // setbg
+                    yield return dialog.source.GetSpriteAsync(spriteKey, (sprite) =>
                     {
-                        yield return dialog.source.GetSpriteAsync(spriteKey, (sprite) =>
-                        {
-                            dialog.GetForeground().SetSprite(sprite);
-                            dialog.GetForeground().SetPosition(position);
-                            dialog.GetForeground().SetScale(scale);
-                        });
-                    }
-                    else
+                        fBackground.Background.SetSprite(sprite);
+                        fBackground.Background.SetPosition(position);
+                        fBackground.Background.SetScale(scale);
+                    });
+                    break;
+                case 2 when isForeground && dialog is IFeatureForeground fForeground: // setfg
+                    yield return dialog.source.GetSpriteAsync(spriteKey, (sprite) =>
                     {
-                        yield return dialog.source.GetSpriteAsync(spriteKey, (sprite) =>
-                        {
-                            dialog.GetBackground().SetSprite(sprite);
-                            dialog.GetBackground().SetPosition(position);
-                            dialog.GetBackground().SetScale(scale);
-                        });
-                    }
+                        fForeground.Foreground.SetSprite(sprite);
+                        fForeground.Foreground.SetPosition(position);
+                        fForeground.Foreground.SetScale(scale);
+                    });
                     break;
-                case 3: // bgshow, fgshow
-                    if (isForeground)
-                        dialog.GetForeground().Show();
-                    else
-                        dialog.GetBackground().Show();
+                case 3 when !isForeground && dialog is IFeatureBackground feature: // bgshow
+                    feature.Background.Show();
                     break;
-                case 4: // bghide, fghide
-                    if (isForeground)
-                        dialog.GetForeground().Hide();
-                    else
-                        dialog.GetBackground().Hide();
+                case 3 when isForeground && dialog is IFeatureForeground feature: // fgshow
+                    feature.Foreground.Show();
                     break;
-                case 5: // bgfadein, fgfadein
+                case 4 when !isForeground && dialog is IFeatureBackground feature: // bghide
+                    feature.Background.Hide();
+                    break;
+                case 4 when isForeground && dialog is IFeatureForeground feature: // fghide
+                    feature.Foreground.Hide();
+                    break;
+                case 5 when !isForeground && dialog is IFeatureBackground feature: // bgfadein
                     if (shouldWait)
-                        yield return isForeground ? dialog.GetForeground().FadeIn(duration) : dialog.GetBackground().FadeIn(duration);
+                        yield return feature.Background.FadeIn(duration);
                     else
-                        dialog.StartCoroutine(isForeground ? dialog.GetForeground().FadeIn(duration) : dialog.GetBackground().FadeIn(duration));
+                        dialog.StartCoroutine(feature.Background.FadeIn(duration));
                     break;
-                case 6: // bgfadeout, fgfadeout
+                case 5 when isForeground && dialog is IFeatureForeground feature: // fgfadein
                     if (shouldWait)
-                        yield return isForeground ? dialog.GetForeground().FadeOut(duration) : dialog.GetBackground().FadeOut(duration);
+                        yield return feature.Foreground.FadeIn(duration);
                     else
-                        dialog.StartCoroutine(isForeground ? dialog.GetForeground().FadeOut(duration) : dialog.GetBackground().FadeOut(duration));
+                        dialog.StartCoroutine(feature.Foreground.FadeIn(duration));
                     break;
-                case 7: // bgcrossfade, fgcrossfade
-                    Sprite sprite_7 = null;
-                    yield return dialog.source.GetSpriteAsync(spriteKey, sprite => { sprite_7 = sprite; });
+                case 6 when !isForeground && dialog is IFeatureBackground feature: // bgfadeout
+                    if (shouldWait)
+                        yield return feature.Background.FadeOut(duration);
+                    else
+                        dialog.StartCoroutine(feature.Background.FadeOut(duration));
+                    break;
+                case 6 when isForeground && dialog is IFeatureForeground feature: // fgfadeout
+                    if (shouldWait)
+                        yield return feature.Foreground.FadeOut(duration);
+                    else
+                        dialog.StartCoroutine(feature.Foreground.FadeOut(duration));
+                    break;
+                case 7 when !isForeground && dialog is IFeatureBackground feature: // bgcrossfade
+                    Sprite sprite_7_b = null;
+                    yield return dialog.source.GetSpriteAsync(spriteKey, sprite => { sprite_7_b = sprite; });
 
                     if (shouldWait)
-                        yield return isForeground
-                            ? dialog.GetForeground().CrossFade(sprite_7, duration)
-                            : dialog.GetBackground().CrossFade(sprite_7, duration);
+                        yield return feature.Background.CrossFade(sprite_7_b, duration);
                     else
-                        dialog.StartCoroutine(isForeground
-                            ? dialog.GetForeground().CrossFade(sprite_7, duration)
-                            : dialog.GetBackground().CrossFade(sprite_7, duration));
+                        dialog.StartCoroutine(feature.Background.CrossFade(sprite_7_b, duration));
                     break;
-                case 8: // bgmove, fgmove
+                case 7 when isForeground && dialog is IFeatureForeground feature: // fgcrossfade
+                    Sprite sprite_7_f = null;
+                    yield return dialog.source.GetSpriteAsync(spriteKey, sprite => { sprite_7_f = sprite; });
+
                     if (shouldWait)
-                        yield return isForeground ? dialog.GetForeground().Move(position, duration) : dialog.GetBackground().Move(position, duration);
+                        yield return feature.Foreground.CrossFade(sprite_7_f, duration);
                     else
-                        dialog.StartCoroutine(isForeground ? dialog.GetForeground().Move(position, duration) : dialog.GetBackground().Move(position, duration));
+                        dialog.StartCoroutine(feature.Foreground.CrossFade(sprite_7_f, duration));
                     break;
-                case 9: // bgscale, fgscale
+                case 8 when !isForeground && dialog is IFeatureBackground feature: // bgmove
                     if (shouldWait)
-                        yield return isForeground ? dialog.GetForeground().Scale(scale, duration) : dialog.GetBackground().Scale(scale, duration);
+                        yield return feature.Background.Move(position, duration);
                     else
-                        dialog.StartCoroutine(isForeground ? dialog.GetForeground().Scale(scale, duration) : dialog.GetBackground().Scale(scale, duration));
+                        dialog.StartCoroutine(feature.Background.Move(position, duration));
+                    break;
+                case 8 when isForeground && dialog is IFeatureForeground feature: // fgmove
+                    if (shouldWait)
+                        yield return feature.Foreground.Move(position, duration);
+                    else
+                        dialog.StartCoroutine(feature.Foreground.Move(position, duration));
+                    break;
+                case 9 when !isForeground && dialog is IFeatureBackground feature: // bgscale
+                    if (shouldWait)
+                        yield return feature.Background.Scale(scale, duration);
+                    else
+                        dialog.StartCoroutine(feature.Background.Scale(scale, duration));
+                    break;
+                case 9 when isForeground && dialog is IFeatureForeground feature: // fgscale
+                    if (shouldWait)
+                        yield return feature.Foreground.Scale(scale, duration);
+                    else
+                        dialog.StartCoroutine(feature.Foreground.Scale(scale, duration));
                     break;
             }
             yield break;
         }
     }
 
-    public class DialogueDataSystem : IDialogue
+    public class DialogueDataSystem : IDialogueData
     {
         public int type;
         public int phase;
@@ -347,46 +372,48 @@ namespace Nabuki
         public NbkVariableType variableType;
         public string value;
 
-        public IEnumerator Run(DialogueManager dialog)
+        public IEnumerator Execute(DialogueManager dialog)
         {
             switch(type)
             {
-                case 0: // define variables, only when does manager support variable
-                    dialog.GetData().CreateVariable(variableKey, value);
+                case 0 when dialog is IFeatureVariable fVariable: // define variables, only when does manager support variable
+                    fVariable.VariableData.CreateVariable(variableKey, value);
                     yield break;
-                case 1: // change variable value, only when does manager support variable
-                    dialog.GetData().SetVariable(variableKey, value);
+                case 1 when dialog is IFeatureVariable fVariable: // change variable value, only when does manager support variable
+                    fVariable.VariableData.SetVariable(variableKey, value);
                     yield break;
                 case 2: // set next phase
-                    dialog.phase = phase;
-                    dialog.dialogueIndex = -1;
+                    dialog.SetPhase(phase);
                     yield break;
-                case 3: // play music, only when does manager support audio
-                    dialog.PlayBGM(musicKey);
+                case 3 when dialog is IFeatureAudio fAudio: // play music, only when does manager support audio
+                    fAudio.PlayBGM(musicKey);
                     yield break;
-                case 4: // play sound effect, only when does manager support audio
-                    dialog.PlaySE(musicKey);
+                case 4 when dialog is IFeatureAudio fAudio: // play sound effect, only when does manager support audio
+                    fAudio.PlaySE(musicKey);
                     yield break;
                 case 5: // waitfor
                     yield return new WaitForSeconds(duration);
+                    break;
+                case 10 when dialog is IFeatureExternalAction feature: // call
+                    yield return feature.CallAction(variableKey);
                     break;
             }
         }
     }
 
-    public class DialogueDataList : IDialogue
+    public class DialogueDataList : IDialogueData
     {
-        public List<IDialogue> list;
+        public List<IDialogueData> list;
 
         public DialogueDataList()
         {
-            list = new List<IDialogue>();
+            list = new List<IDialogueData>();
         }
 
-        public IEnumerator Run(DialogueManager dialog)
+        public IEnumerator Execute(DialogueManager dialog)
         {
             foreach (var dialogue in list)
-                yield return dialogue.Run(dialog);
+                yield return dialogue.Execute(dialog);
         }
     }
 }
