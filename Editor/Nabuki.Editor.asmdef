@@ -1,9 +1,12 @@
 {
     "name": "Nabuki.Editor",
+    "rootNamespace": "Nabuki.Editor",
     "references": [
         "GUID:b50f929d05f48bb4a906acc196368972"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

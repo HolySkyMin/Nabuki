@@ -8,7 +8,7 @@ namespace Nabuki
     {
         public DialogueManager manager;
         public float width, height;
-        public bool usesSlot;
+        public bool useSlot;
         public List<Vector2> slots;
 
         Dictionary<int, string> resident = new Dictionary<int, string>();
@@ -31,7 +31,7 @@ namespace Nabuki
         {
             if (resident.ContainsKey(index))
             {
-                manager.GetCharacter(resident[index]).Hide();
+                (manager as IFeatureCharacterWithField).GetCharacter(resident[index]).Hide();
                 resident[index] = character;
             }
             else
