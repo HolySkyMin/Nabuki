@@ -6,17 +6,21 @@ namespace Nabuki
 {
     public class DialogueField : MonoBehaviour
     {
-        public DialogueManager manager;
-        public float width, height;
-        public bool useSlot;
-        public List<Vector2> slots;
+        public bool UseSlot => useSlot;
+
+        public List<Vector2> Slots => slots;
+
+        [SerializeField] DialogueManager manager;
+        [SerializeField] float width, height;
+        [SerializeField] bool useSlot;
+        [SerializeField, NaughtyAttributes.ShowIf("useSlot")] List<Vector2> slots;
 
         Dictionary<int, string> resident = new Dictionary<int, string>();
 
         public Vector3 GetPosition(Vector2 scalePos)
         {
-            var zero = transform.localPosition - new Vector3(width, height);
-            var one = transform.localPosition + new Vector3(width, height);
+            var zero = new Vector3(-width / 2, -height / 2);
+            var one = new Vector3(width / 2, height / 2);
             return new Vector3(
                 Mathf.LerpUnclamped(zero.x, one.x, scalePos.x),
                 Mathf.LerpUnclamped(zero.y, one.y, scalePos.y));
