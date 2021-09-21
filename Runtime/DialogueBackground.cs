@@ -4,131 +4,33 @@ using UnityEngine;
 
 namespace Nabuki
 {
-    public class DialogueBackground : MonoBehaviour
+    public abstract class DialogueBackground : MonoBehaviour
     {
-        public DialogueField field;
-        public Sprite defaultSprite;
-        public SpriteRenderer[] spritePool;
+        private protected DialogueField Field => field;
 
-        Queue<SpriteRenderer> spriteQueue;
-        SpriteRenderer current;
+        private protected Sprite DefaultSprite => defaultSprite;
 
-        void Awake()
-        {
-            spriteQueue = new Queue<SpriteRenderer>();
-            foreach (var sprite in spritePool)
-            {
-                sprite.gameObject.SetActive(false);
-                spriteQueue.Enqueue(sprite);
-            }
+        [SerializeField] DialogueField field;
+        [SerializeField] Sprite defaultSprite;
 
-            current = spriteQueue.Dequeue();
-        }
+        public abstract void Show();
 
-        public void Show()
-        {
-            current.color = new Color(current.color.r, current.color.g, current.color.b, 1);
-            current.gameObject.SetActive(true);
-        }
+        public abstract void Hide();
 
-        public void Hide()
-        {
-            current.gameObject.SetActive(false);
-            spriteQueue.Enqueue(current);
-            current = spriteQueue.Dequeue();
-        }
+        public abstract void SetSprite(Sprite sprite);
 
-        public void SetSprite(Sprite sprite)
-        {
-            current.sprite = sprite == null ? defaultSprite : sprite;
-        }
+        public abstract void SetPosition(Vector2 position);
 
-        public void SetPosition(Vector2 position)
-        {
-            current.transform.localPosition = field.GetPosition(position);
-        }
+        public abstract void SetScale(float scale);
 
-        public void SetScale(float scale)
-        {
-            current.transform.localScale = new Vector3(scale, scale, 1);
-        }
+        public abstract IEnumerator Move(Vector2 goal, float time);
 
-        public IEnumerator Move(Vector2 goal, float time)
-        {
-            var originPos = current.transform.localPosition;
+        public abstract IEnumerator Scale(float goal, float time);
 
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                SetPosition(Vector2.Lerp(originPos, goal, progress));
-                yield return null;
-            }
-            SetPosition(goal);
-        }
+        public abstract IEnumerator FadeIn(float time);
 
-        public IEnumerator Scale(float goal, float time)
-        {
-            var originScale = current.transform.localScale.x;
+        public abstract IEnumerator FadeOut(float time);
 
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                var curScale = Mathf.Lerp(originScale, goal, progress);
-                current.transform.localScale = new Vector3(curScale, curScale, 1);
-                yield return null;
-            }
-            current.transform.localScale = new Vector3(goal, goal, 1);
-        }
-
-        public IEnumerator FadeIn(float time)
-        {
-            current.color = new Color(current.color.r, current.color.g, current.color.b, 0);
-            current.gameObject.SetActive(true);
-
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                current.color = new Color(current.color.r, current.color.g, current.color.b, progress);
-                yield return null;
-            }
-            current.color = new Color(current.color.r, current.color.g, current.color.b, 1);
-        }
-
-        public IEnumerator FadeOut(float time)
-        {
-            current.color = new Color(current.color.r, current.color.g, current.color.b, 1);
-
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                current.color = new Color(current.color.r, current.color.g, current.color.b, 1 - progress);
-                yield return null;
-            }
-            current.color = new Color(current.color.r, current.color.g, current.color.b, 0);
-            Hide();
-        }
-
-        public IEnumerator CrossFade(Sprite nextSprite, float time)
-        {
-            var next = spriteQueue.Dequeue();
-            next.sprite = nextSprite;
-            next.gameObject.SetActive(true);
-
-            current.color = new Color(current.color.r, current.color.g, current.color.b, 1);
-            next.color = new Color(next.color.r, next.color.g, next.color.b, 0);
-            for(var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                current.color = new Color(current.color.r, current.color.g, current.color.b, 1 - progress);
-                next.color = new Color(next.color.r, next.color.g, next.color.b, progress);
-                yield return null;
-            }
-            current.color = new Color(current.color.r, current.color.g, current.color.b, 0);
-            next.color = new Color(next.color.r, next.color.g, next.color.b, 1);
-
-            current.gameObject.SetActive(false);
-            spriteQueue.Enqueue(current);
-            current = next;
-        }
+        public abstract IEnumerator CrossFade(Sprite nextSprite, float time);
     }
 }

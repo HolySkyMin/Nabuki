@@ -41,5 +41,12 @@ namespace Nabuki.Editor
             Selection.activeObject = PrefabUtility.InstantiatePrefab(Resources.Load("Standard Dialogue"));
             PrefabUtility.UnpackPrefabInstance(Selection.activeObject as GameObject, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
         }
+
+        [MenuItem("GameObject/Nabuki/Standard Dialogue UGUI", false, 25)]
+        public static void SpawnStandardDialogueUGUI()
+        {
+            Selection.activeObject = PrefabUtility.InstantiatePrefab(Resources.Load("Standard Dialogue UGUI"));
+            PrefabUtility.UnpackPrefabInstance(Selection.activeObject as GameObject, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+        }
     }
 }

@@ -4,148 +4,76 @@ using UnityEngine;
 
 namespace Nabuki
 {
-    public class DialogueCharacter : MonoBehaviour
+    public abstract class DialogueCharacter : MonoBehaviour
     {
-        public SpriteRenderer image;
-        public Transform body;
-        public Sprite defaultSprite;
-        
-        [HideInInspector] public string key;
-        [HideInInspector] public string charaName;
-        [HideInInspector] public DialogueField field;
+        public string Key => _key;
 
-        Vector2 position;
-        int slotIndex;
+        public string Name => _name;
 
-        public void Set(string k, string n, DialogueField f, int i)
+        private protected int SlotIndex => _slotIndex;
+
+        private protected DialogueField Field => _field;
+
+        private protected Vector2 Position
         {
-            key = k;
-            charaName = n;
-            field = f;
-            slotIndex = i;
-
-            if (field.useSlot)
-                position = field.slots[slotIndex];
-            else
-                position = new Vector2(0.5f, 0.5f);
-
-            body.name = "Sprite: " + key;
-            body.SetParent(field.transform);
-            body.localPosition = field.GetPosition(position);
-            body.localScale = Vector3.one;
-        }
-
-        public void Show()
-        {
-            if(field.useSlot)
+            get => _position;
+            set
             {
-                SetPosition(field.slots[slotIndex]);
-                field.FillSlot(slotIndex, key);
+                _position = value;
+                UpdateTransform(_field.GetPosition(_position));
             }
-            image.color = new Color(image.color.r, image.color.g, image.color.b, 1);
-            body.gameObject.SetActive(true);
         }
 
-        public void Hide()
+        int _slotIndex;
+        string _key, _name;
+        Vector2 _position;
+        DialogueField _field;
+
+        public void Initialize(string key, string name, DialogueField field, int index)
         {
-            body.gameObject.SetActive(false);
+            _key = key;
+            _name = name;
+            _field = field;
+            _slotIndex = index;
+
+            Position = field.UseSlot ? field.Slots[_slotIndex] : new Vector2(0.5f, 0.5f);
+
+            InitializeTransform();
         }
 
-        public void SetPosition(Vector2 newPosition)
+        public void SetPosition(Vector2 position)
         {
-            position = newPosition;
-            body.localPosition = field.GetPosition(position);
+            Position = position;
         }
 
-        public IEnumerator Move(Vector2 goal, float time)
-        {
-            var originPos = position;
+        private protected abstract void InitializeTransform();
 
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                SetPosition(Vector2.Lerp(originPos, goal, progress));
-                yield return null;
-            }
-            SetPosition(goal);
-        }
+        private protected abstract void UpdateTransform(Vector2 convertedPosition);
 
-        public IEnumerator Scale(float goal, float time)
-        {
-            var originScale = body.localScale.x;
+        public abstract void Show();
 
-            for(var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                var curScale = Mathf.Lerp(originScale, goal, progress);
-                body.localScale = new Vector3(curScale, curScale, 1);
-                yield return null;
-            }
-            body.localScale = new Vector3(goal, goal, 1);
-        }
+        public abstract void Hide();
 
-        public IEnumerator FadeIn(float time)
-        {
-            body.gameObject.SetActive(true);
-            image.color = new Color(image.color.r, image.color.g, image.color.b, 0);
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                image.color = new Color(image.color.r, image.color.g, image.color.b, progress);
-                yield return null;
-            }
-            image.color = new Color(image.color.r, image.color.g, image.color.b, 1);
-        }
+        public abstract void SetSprite(Sprite sprite);
 
-        public IEnumerator FadeOut(float time)
-        {
-            image.color = new Color(image.color.r, image.color.g, image.color.b, 1);
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                image.color = new Color(image.color.r, image.color.g, image.color.b, 1 - progress);
-                yield return null;
-            }
-            image.color = new Color(image.color.r, image.color.g, image.color.b, 0);
-            body.gameObject.SetActive(false);
-        }
+        public abstract void SetScale(Vector3 scale);
 
-        public IEnumerator NodUp()
-        {
-            var originPos = position;
-            yield return Move(originPos + new Vector2(0, 0.05f), 0.1f);
-            yield return Move(originPos, 0.1f);
-        }
+        public abstract void SetColor(Color color);
 
-        public IEnumerator NodDown()
-        {
-            var originPos = position;
-            yield return Move(originPos - new Vector2(0, 0.05f), 0.1f);
-            yield return Move(originPos, 0.1f);
-        }
+        public abstract IEnumerator Move(Vector2 goal, float time);
 
-        public IEnumerator Blackout(float time)
-        {
-            var originColor = image.color;
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                image.color = Color.Lerp(originColor, Color.black, progress);
-                yield return null;
-            }
-            yield break;
-        }
+        public abstract IEnumerator Scale(float goal, float time);
 
-        public IEnumerator Colorize(float time, bool inactive = false)
-        {
-            var originColor = image.color;
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
-            {
-                var progress = clock / time;
-                image.color = Color.Lerp(originColor, inactive ? Color.gray : Color.white, progress);
-                yield return null;
-            }
-            yield break;
-        }
+        public abstract IEnumerator FadeIn(float time);
+
+        public abstract IEnumerator FadeOut(float time);
+
+        public abstract IEnumerator NodUp();
+
+        public abstract IEnumerator NodDown();
+
+        public abstract IEnumerator Blackout(float time);
+
+        public abstract IEnumerator Colorize(float time, bool inactive = false);
     }
 }

@@ -24,8 +24,10 @@ namespace Nabuki
         [SerializeField] DialogueField effectField;
         [SerializeField] DialogueBackground background;
         [SerializeField] DialogueBackground foreground;
-        [SerializeField] SpriteRenderer sceneDimmer;
         [SerializeField] DialogueEvent events;
+        [SerializeField] bool useUIField;
+        [SerializeField, NaughtyAttributes.ShowIf("useUIField")] CanvasGroup fieldDimmerUI;
+        [SerializeField, NaughtyAttributes.HideIf("useUIField")] SpriteRenderer fieldDimmerWorld;
 
         IDialogueAudio _audio;
         NbkData _data;
@@ -51,7 +53,7 @@ namespace Nabuki
             else
             {
                 var newCharacter = Instantiate(characterTemplate);
-                newCharacter.Set(key, cname, characterField, fieldIndex);
+                newCharacter.Initialize(key, cname, characterField, fieldIndex);
                 newCharacter.name = "Character: " + key;
                 newCharacter.gameObject.SetActive(true);
                 characters.Add(key, newCharacter);
@@ -72,7 +74,7 @@ namespace Nabuki
             {
                 if (character.Key == key)
                 {
-                    cname = character.Value.charaName;
+                    cname = character.Value.Name;
                     return true;
                 }
             }
@@ -84,7 +86,7 @@ namespace Nabuki
         {
             foreach (var character in characters)
             {
-                if (character.Value.charaName == cname)
+                if (character.Value.Name == cname)
                 {
                     key = character.Key;
                     return true;
@@ -106,28 +108,58 @@ namespace Nabuki
 
         public IEnumerator SceneFadeIn(float time)
         {
-            sceneDimmer.color = Color.black;
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
+            if (useUIField)
             {
-                var progress = clock / time;
-                sceneDimmer.color = Color.Lerp(Color.black, Color.clear, progress);
-                yield return null;
+                fieldDimmerUI.alpha = 1;
+                for (var clock = 0f; clock < time; clock += Time.deltaTime)
+                {
+                    var progress = clock / time;
+                    fieldDimmerUI.alpha = 1 - progress;
+                    yield return null;
+                }
+                fieldDimmerUI.alpha = 0;
+                fieldDimmerUI.gameObject.SetActive(false);
             }
-            sceneDimmer.color = Color.clear;
-            sceneDimmer.gameObject.SetActive(false);
+            else
+            {
+                fieldDimmerWorld.color = Color.black;
+                for (var clock = 0f; clock < time; clock += Time.deltaTime)
+                {
+                    var progress = clock / time;
+                    fieldDimmerWorld.color = Color.Lerp(Color.black, Color.clear, progress);
+                    yield return null;
+                }
+                fieldDimmerWorld.color = Color.clear;
+                fieldDimmerWorld.gameObject.SetActive(false);
+            }
         }
 
         public IEnumerator SceneFadeOut(float time)
         {
-            sceneDimmer.color = Color.clear;
-            sceneDimmer.gameObject.SetActive(true);
-            for (var clock = 0f; clock < time; clock += Time.deltaTime)
+            if (useUIField)
             {
-                var progress = clock / time;
-                sceneDimmer.color = Color.Lerp(Color.clear, Color.black, progress);
-                yield return null;
+                fieldDimmerUI.alpha = 0;
+                fieldDimmerUI.gameObject.SetActive(true);
+                for (var clock = 0f; clock < time; clock += Time.deltaTime)
+                {
+                    var progress = clock / time;
+                    fieldDimmerUI.alpha = progress;
+                    yield return null;
+                }
+                fieldDimmerUI.alpha = 1;
             }
-            sceneDimmer.color = Color.black;
+            else
+            {
+                fieldDimmerWorld.color = Color.clear;
+                fieldDimmerWorld.gameObject.SetActive(true);
+                for (var clock = 0f; clock < time; clock += Time.deltaTime)
+                {
+                    var progress = clock / time;
+                    fieldDimmerWorld.color = Color.Lerp(Color.clear, Color.black, progress);
+                    yield return null;
+                }
+                fieldDimmerWorld.color = Color.black;
+            }
         }
 
         public void SetAudio(IDialogueAudio audio)

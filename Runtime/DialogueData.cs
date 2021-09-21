@@ -153,14 +153,14 @@ namespace Nabuki
                         var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
                         yield return dialog.Source.GetSpriteAsync(fileName, (sprite) =>
                         {
-                            fCharacter.GetCharacter(characterKey).image.sprite = sprite == null ? fCharacter.GetCharacter(characterKey).defaultSprite : sprite;
+                            fCharacter.GetCharacter(characterKey).SetSprite(sprite);
                         });
                         break;
                     case 2: // setpos, only when does manager support character field
                         fCharacter.GetCharacter(characterKey).SetPosition(position);
                         break;
                     case 3: // setsize, only when does manager support character field
-                        fCharacter.GetCharacter(characterKey).body.localScale = new Vector3(scale, scale, 1);
+                        fCharacter.GetCharacter(characterKey).SetScale(new Vector3(scale, scale, 1));
                         break;
                     case 4: // setstate, only when does manager support character field
                         switch (state)
@@ -168,10 +168,10 @@ namespace Nabuki
                             case 0: // active (-) - does nothing. because default state is active!
                                 break;
                             case 1: // inactive
-                                fCharacter.GetCharacter(characterKey).image.color = new Color(0.5f, 0.5f, 0.5f, 1);
+                                fCharacter.GetCharacter(characterKey).SetColor(new Color(0.5f, 0.5f, 0.5f, 1));
                                 break;
                             case 2: // blackout
-                                fCharacter.GetCharacter(characterKey).image.color = new Color(0, 0, 0, 1);
+                                fCharacter.GetCharacter(characterKey).SetColor(new Color(0, 0, 0, 1));
                                 break;
                         }
                         break;
