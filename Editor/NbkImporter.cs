@@ -1,15 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor.Experimental.AssetImporters;
+
 using UnityEngine;
 
 namespace Nabuki.Editor
 {
-    [ScriptedImporter(1, "tsv")]
-    public class TSVImporter : ScriptedImporter
+    [UnityEditor.AssetImporters.ScriptedImporter(1, "tsv")]
+    public class TSVImporter : UnityEditor.AssetImporters.ScriptedImporter
     {
-        public override void OnImportAsset(AssetImportContext ctx)
+        public override void OnImportAsset(UnityEditor.AssetImporters.AssetImportContext ctx)
         {
             TextAsset subAsset = new TextAsset(File.ReadAllText(ctx.assetPath));
             ctx.AddObjectToAsset("text", subAsset);
@@ -17,10 +17,10 @@ namespace Nabuki.Editor
         }
     }
 
-    [ScriptedImporter(1, "nbk")]
-    public class NbkImporter : ScriptedImporter
+    [UnityEditor.AssetImporters.ScriptedImporter(1, "nbk")]
+    public class NbkImporter : UnityEditor.AssetImporters.ScriptedImporter
     {
-        public override void OnImportAsset(AssetImportContext ctx)
+        public override void OnImportAsset(UnityEditor.AssetImporters.AssetImportContext ctx)
         {
             TextAsset subAsset = new TextAsset(File.ReadAllText(ctx.assetPath));
             ctx.AddObjectToAsset("text", subAsset);

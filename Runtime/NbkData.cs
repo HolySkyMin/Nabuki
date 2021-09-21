@@ -9,7 +9,12 @@ namespace Nabuki
     public class NbkData
     {
         public string playerName;
-        public Dictionary<string, NbkVariable> variables; 
+        public Dictionary<string, NbkVariable> variables;
+
+        public NbkData()
+        {
+            variables = new Dictionary<string, NbkVariable>();
+        }
 
         public NbkVariable GetVariable(string key)
         {

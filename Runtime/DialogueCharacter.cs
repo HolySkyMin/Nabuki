@@ -24,7 +24,7 @@ namespace Nabuki
             field = f;
             slotIndex = i;
 
-            if (field.usesSlot)
+            if (field.useSlot)
                 position = field.slots[slotIndex];
             else
                 position = new Vector2(0.5f, 0.5f);
@@ -37,7 +37,7 @@ namespace Nabuki
 
         public void Show()
         {
-            if(field.usesSlot)
+            if(field.useSlot)
             {
                 SetPosition(field.slots[slotIndex]);
                 field.FillSlot(slotIndex, key);
