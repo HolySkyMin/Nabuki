@@ -71,9 +71,9 @@ namespace Nabuki
             if (dialog is IFeatureAudio fAudio && voiceKey != "")  // Parser sends voice key only when does manager support audio
                 fAudio.Audio.PlayVoice(voiceKey);
 
-            if (dialog.enableLog)
-                dialog.logger.Log(realTalker, text, voiceKey, isPlayer);
-            yield return dialog.displayer.ShowText(realTalker, text, displayIndex, unstoppable);
+            if (dialog.LogEnabled)
+                dialog.Logger.Log(realTalker, text, voiceKey, isPlayer);
+            yield return dialog.Displayer.ShowText(realTalker, text, displayIndex, unstoppable);
         }
     }
 
@@ -151,7 +151,7 @@ namespace Nabuki
                         break;
                     case 1: // setsprite, only when does manager support character field
                         var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
-                        yield return dialog.source.GetSpriteAsync(fileName, (sprite) =>
+                        yield return dialog.Source.GetSpriteAsync(fileName, (sprite) =>
                         {
                             fCharacter.GetCharacter(characterKey).image.sprite = sprite == null ? fCharacter.GetCharacter(characterKey).defaultSprite : sprite;
                         });
@@ -264,7 +264,7 @@ namespace Nabuki
                         dialog.StartCoroutine(fTransition.SceneFadeOut(duration));
                     break;
                 case 2 when !isForeground && dialog is IFeatureBackground fBackground: // setbg
-                    yield return dialog.source.GetSpriteAsync(spriteKey, (sprite) =>
+                    yield return dialog.Source.GetSpriteAsync(spriteKey, (sprite) =>
                     {
                         fBackground.Background.SetSprite(sprite);
                         fBackground.Background.SetPosition(position);
@@ -272,7 +272,7 @@ namespace Nabuki
                     });
                     break;
                 case 2 when isForeground && dialog is IFeatureForeground fForeground: // setfg
-                    yield return dialog.source.GetSpriteAsync(spriteKey, (sprite) =>
+                    yield return dialog.Source.GetSpriteAsync(spriteKey, (sprite) =>
                     {
                         fForeground.Foreground.SetSprite(sprite);
                         fForeground.Foreground.SetPosition(position);
@@ -317,7 +317,7 @@ namespace Nabuki
                     break;
                 case 7 when !isForeground && dialog is IFeatureBackground feature: // bgcrossfade
                     Sprite sprite_7_b = null;
-                    yield return dialog.source.GetSpriteAsync(spriteKey, sprite => { sprite_7_b = sprite; });
+                    yield return dialog.Source.GetSpriteAsync(spriteKey, sprite => { sprite_7_b = sprite; });
 
                     if (shouldWait)
                         yield return feature.Background.CrossFade(sprite_7_b, duration);
@@ -326,7 +326,7 @@ namespace Nabuki
                     break;
                 case 7 when isForeground && dialog is IFeatureForeground feature: // fgcrossfade
                     Sprite sprite_7_f = null;
-                    yield return dialog.source.GetSpriteAsync(spriteKey, sprite => { sprite_7_f = sprite; });
+                    yield return dialog.Source.GetSpriteAsync(spriteKey, sprite => { sprite_7_f = sprite; });
 
                     if (shouldWait)
                         yield return feature.Foreground.CrossFade(sprite_7_f, duration);

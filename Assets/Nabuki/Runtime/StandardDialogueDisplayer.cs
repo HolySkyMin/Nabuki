@@ -24,7 +24,6 @@ namespace Nabuki
             nameText.SetText(talker);
             bodyText.SetText(text);
 
-            var dt = System.DateTime.Now;
             if (animateText)
             {
                 unskipIndicator.SetActive(unskippable);

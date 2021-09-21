@@ -8,16 +8,24 @@ namespace Nabuki
 {
     public abstract class DialogueManager : MonoBehaviour
     {
+        public DialogueSource Source => source;
+
+        public DialogueDisplayer Displayer => displayer;
+
+        public DialogueLogger Logger => logger;
+
+        public bool LogEnabled => enableLog;
+
         public bool Ended { get; private set; }
 
         public int Phase => _dialogue.CurrentPhase;
 
         [Header("Universal Components")]
-        public DialogueSource source;
-        public DialogueDisplayer displayer;
-        public bool enableLog;
+        [SerializeField] DialogueSource source;
+        [SerializeField] DialogueDisplayer displayer;
+        [SerializeField] bool enableLog;
         [ShowIf("enableLog")]
-        public DialogueLogger logger;
+        [SerializeField] DialogueLogger logger;
 
         DialogueDataCollection _dialogue;
         IDialogueParser _parser;

@@ -18,17 +18,18 @@ namespace Nabuki
         public NbkData VariableData => _data;
 
         [Header("Standard Dialogue Components")]
-        public DialogueSelector selector;
-        public DialogueCharacter characterTemplate;
-        public DialogueField characterField;
-        public DialogueField effectField;
-        public DialogueBackground background;
-        public DialogueBackground foreground;
-        public SpriteRenderer sceneDimmer;
-        public DialogueEvent events;
+        [SerializeField] DialogueSelector selector;
+        [SerializeField] DialogueCharacter characterTemplate;
+        [SerializeField] DialogueField characterField;
+        [SerializeField] DialogueField effectField;
+        [SerializeField] DialogueBackground background;
+        [SerializeField] DialogueBackground foreground;
+        [SerializeField] SpriteRenderer sceneDimmer;
+        [SerializeField] DialogueEvent events;
 
         IDialogueAudio _audio;
         NbkData _data;
+
         Dictionary<string, DialogueCharacter> characters;
         Dictionary<string, System.Func<IEnumerator>> actions;
 
@@ -133,7 +134,7 @@ namespace Nabuki
         {
             _audio = audio;
 
-            _audio.SetSource(source);
+            _audio.SetSource(Source);
         }
 
         public void SetVariableData(NbkData data)

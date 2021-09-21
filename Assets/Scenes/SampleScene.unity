@@ -345,7 +345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c91c1d83e7485cd40ae11c6ac08c3200, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialogToPlay: test_rc_script
+  dialogToPlay: NabukiScript PoC
   manager: {fileID: 1826938684848951922}
   stdAudio: {fileID: 1826938685077490142}
 --- !u!4 &1492381414
