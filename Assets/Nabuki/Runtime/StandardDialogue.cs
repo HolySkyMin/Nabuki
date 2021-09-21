@@ -13,23 +13,22 @@ namespace Nabuki
 
         public DialogueBackground Foreground => foreground;
 
-        public DialogueAudio Audio => audio;
+        public IDialogueAudio Audio => _audio;
 
-        public NbkData VariableData => data;
+        public NbkData VariableData => _data;
 
         [Header("Standard Dialogue Components")]
         public DialogueSelector selector;
         public DialogueCharacter characterTemplate;
         public DialogueField characterField;
         public DialogueField effectField;
-        public new DialogueAudio audio;
         public DialogueBackground background;
         public DialogueBackground foreground;
         public SpriteRenderer sceneDimmer;
         public DialogueEvent events;
 
-        [HideInInspector] public NbkData data;
-
+        IDialogueAudio _audio;
+        NbkData _data;
         Dictionary<string, DialogueCharacter> characters;
         Dictionary<string, System.Func<IEnumerator>> actions;
 
@@ -130,19 +129,16 @@ namespace Nabuki
             sceneDimmer.color = Color.black;
         }
 
-        public void PlayBGM(string key)
+        public void SetAudio(IDialogueAudio audio)
         {
+            _audio = audio;
 
+            _audio.SetSource(source);
         }
 
-        public void PlaySE(string key)
+        public void SetVariableData(NbkData data)
         {
-
-        }
-
-        public void PlayVoice(string key)
-        {
-
+            _data = data;
         }
 
         public void AssignAction(string key, System.Func<IEnumerator> action)

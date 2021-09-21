@@ -347,6 +347,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dialogToPlay: test_rc_script
   manager: {fileID: 1826938684848951922}
+  stdAudio: {fileID: 1826938685077490142}
 --- !u!4 &1492381414
 Transform:
   m_ObjectHideFlags: 0
@@ -3357,13 +3358,10 @@ MonoBehaviour:
   characterTemplate: {fileID: 1826938684820390681}
   characterField: {fileID: 1826938684176528613}
   effectField: {fileID: 1826938684742594673}
-  audio: {fileID: 1826938685077490142}
   background: {fileID: 1826938684129796773}
   foreground: {fileID: 1826938683414334148}
   sceneDimmer: {fileID: 1826938684964663590}
   events: {fileID: 839384680}
-  data:
-    playerName: 
 --- !u!4 &1826938684848951923
 Transform:
   m_ObjectHideFlags: 0

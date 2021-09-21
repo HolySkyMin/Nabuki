@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Nabuki
 {
-    public class DialogueParser : IDialogueParser
+    public class StandardDialogueParser : IDialogueParser
     {
         //bool ifExist;
         //DialogueDataCondition ifData;
@@ -15,13 +15,13 @@ namespace Nabuki
         Dictionary<string, Func<NbkTokenizer, IDialogueData>> customSyntax;
         
 
-        public DialogueParser(DialogueManager target)
+        public StandardDialogueParser(DialogueManager target)
         {
             manager = target;
             customSyntax = new Dictionary<string, Func<NbkTokenizer, IDialogueData>>();
         }
 
-        public DialogueParser(DialogueManager target, Dictionary<string, Func<NbkTokenizer, IDialogueData>> syntaxPack)
+        public StandardDialogueParser(DialogueManager target, Dictionary<string, Func<NbkTokenizer, IDialogueData>> syntaxPack)
         {
             manager = target;
             customSyntax = syntaxPack;

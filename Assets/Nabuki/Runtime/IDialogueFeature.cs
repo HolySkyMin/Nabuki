@@ -6,61 +6,61 @@ namespace Nabuki
 {
     public interface IFeatureCharacter
     {
-        void AddCharacter(string key, string name);
-        bool CharacterExists(string key);
-        bool FindCharacterKey(string name, out string key);
-        bool FindCharacterName(string key, out string name);
+        public void AddCharacter(string key, string name);
+        public bool CharacterExists(string key);
+        public bool FindCharacterKey(string name, out string key);
+        public bool FindCharacterName(string key, out string name);
     }
 
     public interface IFeatureCharacterWithField : IFeatureCharacter
     {
-        void AddCharacter(string key, string name, int fieldIndex);
-        DialogueCharacter GetCharacter(string key);
+        public void AddCharacter(string key, string name, int fieldIndex);
+        public DialogueCharacter GetCharacter(string key);
     }
 
     public interface IFeatureEffect
     {
-        IEnumerator PlayEffect(string key);
+        public IEnumerator PlayEffect(string key);
     }
 
     public interface IFeatureSelection
     {
-        DialogueSelector Selector { get; }
+        public DialogueSelector Selector { get; }
     }
 
     public interface IFeatureTransition
     {
-        IEnumerator SceneFadeIn(float time);
-        IEnumerator SceneFadeOut(float time);
+        public IEnumerator SceneFadeIn(float time);
+        public IEnumerator SceneFadeOut(float time);
     }
 
     public interface IFeatureBackground : IFeatureTransition
     {
-        DialogueBackground Background { get; }
+        public DialogueBackground Background { get; }
     }
 
     public interface IFeatureForeground
     {
-        DialogueBackground Foreground { get; }
+        public DialogueBackground Foreground { get; }
     }
 
     public interface IFeatureVariable
     {
-        NbkData VariableData { get; }
+        public NbkData VariableData { get; }
+
+        public void SetVariableData(NbkData data);
     }
 
     public interface IFeatureAudio
     {
-        DialogueAudio Audio { get; }
+        public IDialogueAudio Audio { get; }
 
-        void PlayBGM(string key);
-        void PlaySE(string key);
-        void PlayVoice(string key);
+        public void SetAudio(IDialogueAudio audio);
     }
 
     public interface IFeatureExternalAction
     {
-        void AssignAction(string key, System.Func<IEnumerator> action);
-        IEnumerator CallAction(string key);
+        public void AssignAction(string key, System.Func<IEnumerator> action);
+        public IEnumerator CallAction(string key);
     }
 }

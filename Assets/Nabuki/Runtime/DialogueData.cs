@@ -69,7 +69,7 @@ namespace Nabuki
             }
 
             if (dialog is IFeatureAudio fAudio && voiceKey != "")  // Parser sends voice key only when does manager support audio
-                fAudio.PlayVoice(voiceKey);
+                fAudio.Audio.PlayVoice(voiceKey);
 
             if (dialog.enableLog)
                 dialog.logger.Log(realTalker, text, voiceKey, isPlayer);
@@ -386,10 +386,10 @@ namespace Nabuki
                     dialog.SetPhase(phase);
                     yield break;
                 case 3 when dialog is IFeatureAudio fAudio: // play music, only when does manager support audio
-                    fAudio.PlayBGM(musicKey);
+                    fAudio.Audio.PlayBGM(musicKey);
                     yield break;
                 case 4 when dialog is IFeatureAudio fAudio: // play sound effect, only when does manager support audio
-                    fAudio.PlaySE(musicKey);
+                    fAudio.Audio.PlaySE(musicKey);
                     yield break;
                 case 5: // waitfor
                     yield return new WaitForSeconds(duration);
