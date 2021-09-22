@@ -6,9 +6,9 @@ namespace Nabuki
 {
     public abstract class DialogueBackground : MonoBehaviour
     {
-        private protected DialogueField Field => field;
+        protected DialogueField Field => field;
 
-        private protected Sprite DefaultSprite => defaultSprite;
+        protected Sprite DefaultSprite => defaultSprite;
 
         [SerializeField] DialogueField field;
         [SerializeField] Sprite defaultSprite;

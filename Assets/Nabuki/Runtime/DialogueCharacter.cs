@@ -10,11 +10,11 @@ namespace Nabuki
 
         public string Name => _name;
 
-        private protected int SlotIndex => _slotIndex;
+        protected int SlotIndex => _slotIndex;
 
-        private protected DialogueField Field => _field;
+        protected DialogueField Field => _field;
 
-        private protected Vector2 Position
+        protected Vector2 Position
         {
             get => _position;
             set
@@ -46,9 +46,9 @@ namespace Nabuki
             Position = position;
         }
 
-        private protected abstract void InitializeTransform();
+        protected abstract void InitializeTransform();
 
-        private protected abstract void UpdateTransform(Vector2 convertedPosition);
+        protected abstract void UpdateTransform(Vector2 convertedPosition);
 
         public abstract void Show();
 
