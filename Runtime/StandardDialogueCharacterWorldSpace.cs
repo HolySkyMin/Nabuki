@@ -10,7 +10,7 @@ namespace Nabuki
         [SerializeField] Transform body;
         [SerializeField] Sprite defaultSprite;
 
-        private protected override void InitializeTransform()
+        protected override void InitializeTransform()
         {
             body.name = "Sprite: " + Key;
             body.SetParent(Field.transform);
@@ -19,7 +19,7 @@ namespace Nabuki
             UpdateTransform(Field.GetPosition(Position));
         }
 
-        private protected override void UpdateTransform(Vector2 convertedPosition)
+        protected override void UpdateTransform(Vector2 convertedPosition)
         {
             body.localPosition = convertedPosition;
         }

@@ -12,7 +12,7 @@ namespace Nabuki
         [SerializeField] CanvasGroup canvasGroup;
         [SerializeField] Sprite defaultSprite;
 
-        private protected override void InitializeTransform()
+        protected override void InitializeTransform()
         {
             transform.SetParent(Field.transform);
             transform.localPosition = Vector3.zero;
@@ -21,7 +21,7 @@ namespace Nabuki
             UpdateTransform(Field.GetPosition(Position));
         }
 
-        private protected override void UpdateTransform(Vector2 convertedPosition)
+        protected override void UpdateTransform(Vector2 convertedPosition)
         {
             body.anchoredPosition = convertedPosition;
         }
