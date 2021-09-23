@@ -32,9 +32,9 @@ namespace Nabuki
                     realTalker = "";
                     break;
                 default:
-                    if (dialog is IFeatureCharacter fCharacter)
+                    if (dialog is IFeatureCharacter feature)
                     {
-                        var registered = fCharacter.FindCharacterName(talker, out realTalker);
+                        var registered = feature.FindCharacterName(talker, out realTalker);
                         if (!registered)
                             realTalker = talker;
                         if (hideName)
@@ -55,7 +55,7 @@ namespace Nabuki
                         case "player":
                             valueword = fVariable.VariableData.playerName; break;
                         default:
-                            if (dialog is IFeatureCharacter fCharacter && fCharacter.FindCharacterName(keyword, out valueword))
+                            if (dialog is IFeatureCharacter feature && feature.FindCharacterName(keyword, out valueword))
                                 break;
                             else
                             {
@@ -142,96 +142,96 @@ namespace Nabuki
 
         public IEnumerator Execute(DialogueManager dialog)
         {
-            if (dialog is IFeatureCharacterWithField fCharacter)
+            switch (type)
             {
-                switch (type)
-                {
-                    case 0: // character
-                        fCharacter.AddCharacter(characterKey, spriteKey, state);
-                        break;
-                    case 1: // setsprite, only when does manager support character field
-                        var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
-                        yield return dialog.Source.GetSpriteAsync(fileName, (sprite) =>
-                        {
-                            fCharacter.GetCharacter(characterKey).SetSprite(sprite);
-                        });
-                        break;
-                    case 2: // setpos, only when does manager support character field
-                        fCharacter.GetCharacter(characterKey).SetPosition(position);
-                        break;
-                    case 3: // setsize, only when does manager support character field
-                        fCharacter.GetCharacter(characterKey).SetScale(new Vector3(scale, scale, 1));
-                        break;
-                    case 4: // setstate, only when does manager support character field
-                        switch (state)
-                        {
-                            case 0: // active (-) - does nothing. because default state is active!
-                                break;
-                            case 1: // inactive
-                                fCharacter.GetCharacter(characterKey).SetColor(new Color(0.5f, 0.5f, 0.5f, 1));
-                                break;
-                            case 2: // blackout
-                                fCharacter.GetCharacter(characterKey).SetColor(new Color(0, 0, 0, 1));
-                                break;
-                        }
-                        break;
-                    case 5:  // show, only when does manager support character field
-                        fCharacter.GetCharacter(characterKey).Show();
-                        break;
-                    case 6:  // hide, only when does manager support character field
-                        fCharacter.GetCharacter(characterKey).Hide();
-                        break;
-                    case 10: // move - animation index starts with 10, only when does manager support character field
-                        if (shouldWait)
-                            yield return fCharacter.GetCharacter(characterKey).Move(position, duration);
-                        else
-                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).Move(position, duration));
-                        break;
-                    case 11: // scale, only when does manager support character field
-                        if (shouldWait)
-                            yield return fCharacter.GetCharacter(characterKey).Scale(scale, duration);
-                        else
-                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).Scale(scale, duration));
-                        break;
-                    case 12: // fadein, only when does manager support character field
-                        if (shouldWait)
-                            yield return fCharacter.GetCharacter(characterKey).FadeIn(duration);
-                        else
-                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).FadeIn(duration));
-                        break;
-                    case 13: // fadeout, only when does manager support character field
-                        if (shouldWait)
-                            yield return fCharacter.GetCharacter(characterKey).FadeOut(duration);
-                        else
-                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).FadeOut(duration));
-                        break;
-                    case 14: // nodup, only when does manager support character field
-                        if (shouldWait)
-                            yield return fCharacter.GetCharacter(characterKey).NodUp();
-                        else
-                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).NodUp());
-                        break;
-                    case 15: // noddown, only when does manager support character field
-                        if (shouldWait)
-                            yield return fCharacter.GetCharacter(characterKey).NodDown();
-                        else
-                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).NodDown());
-                        break;
-                    case 16: // blackout, only when does manager support character field
-                        if (shouldWait)
-                            yield return fCharacter.GetCharacter(characterKey).Blackout(duration);
-                        else
-                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).Blackout(duration));
-                        break;
-                    case 17:  // colorize, only when does manager support character field
-                        if (shouldWait)
-                            yield return fCharacter.GetCharacter(characterKey).Colorize(duration);
-                        else
-                            dialog.StartCoroutine(fCharacter.GetCharacter(characterKey).Colorize(duration));
-                        break;
-                }
+                case 0 when dialog is IFeatureCharacter feature: // character
+                    if (dialog is IFeatureCharacterWithField featurePlus)
+                        featurePlus.AddCharacter(characterKey, spriteKey, state);
+                    else
+                        feature.AddCharacter(characterKey, spriteKey);
+                    break;
+                case 1 when dialog is IFeatureCharacterWithField feature: // setsprite, only when does manager support character field
+                    var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
+                    yield return dialog.Source.GetSpriteAsync(fileName, (sprite) =>
+                    {
+                        feature.GetCharacter(characterKey).SetSprite(sprite);
+                    });
+                    break;
+                case 2 when dialog is IFeatureCharacterWithField feature: // setpos, only when does manager support character field
+                    feature.GetCharacter(characterKey).SetPosition(position);
+                    break;
+                case 3 when dialog is IFeatureCharacterWithField feature: // setsize, only when does manager support character field
+                    feature.GetCharacter(characterKey).SetScale(new Vector3(scale, scale, 1));
+                    break;
+                case 4 when dialog is IFeatureCharacterWithField feature: // setstate, only when does manager support character field
+                    switch (state)
+                    {
+                        case 0: // active (-) - does nothing. because default state is active!
+                            break;
+                        case 1: // inactive
+                            feature.GetCharacter(characterKey).SetColor(new Color(0.5f, 0.5f, 0.5f, 1));
+                            break;
+                        case 2: // blackout
+                            feature.GetCharacter(characterKey).SetColor(new Color(0, 0, 0, 1));
+                            break;
+                    }
+                    break;
+                case 5 when dialog is IFeatureCharacterWithField feature:  // show, only when does manager support character field
+                    feature.GetCharacter(characterKey).Show();
+                    break;
+                case 6 when dialog is IFeatureCharacterWithField feature:  // hide, only when does manager support character field
+                    feature.GetCharacter(characterKey).Hide();
+                    break;
+                case 10 when dialog is IFeatureCharacterWithField feature: // move - animation index starts with 10, only when does manager support character field
+                    if (shouldWait)
+                        yield return feature.GetCharacter(characterKey).Move(position, duration);
+                    else
+                        dialog.StartCoroutine(feature.GetCharacter(characterKey).Move(position, duration));
+                    break;
+                case 11 when dialog is IFeatureCharacterWithField feature: // scale, only when does manager support character field
+                    if (shouldWait)
+                        yield return feature.GetCharacter(characterKey).Scale(scale, duration);
+                    else
+                        dialog.StartCoroutine(feature.GetCharacter(characterKey).Scale(scale, duration));
+                    break;
+                case 12 when dialog is IFeatureCharacterWithField feature: // fadein, only when does manager support character field
+                    if (shouldWait)
+                        yield return feature.GetCharacter(characterKey).FadeIn(duration);
+                    else
+                        dialog.StartCoroutine(feature.GetCharacter(characterKey).FadeIn(duration));
+                    break;
+                case 13 when dialog is IFeatureCharacterWithField feature: // fadeout, only when does manager support character field
+                    if (shouldWait)
+                        yield return feature.GetCharacter(characterKey).FadeOut(duration);
+                    else
+                        dialog.StartCoroutine(feature.GetCharacter(characterKey).FadeOut(duration));
+                    break;
+                case 14 when dialog is IFeatureCharacterWithField feature: // nodup, only when does manager support character field
+                    if (shouldWait)
+                        yield return feature.GetCharacter(characterKey).NodUp();
+                    else
+                        dialog.StartCoroutine(feature.GetCharacter(characterKey).NodUp());
+                    break;
+                case 15 when dialog is IFeatureCharacterWithField feature: // noddown, only when does manager support character field
+                    if (shouldWait)
+                        yield return feature.GetCharacter(characterKey).NodDown();
+                    else
+                        dialog.StartCoroutine(feature.GetCharacter(characterKey).NodDown());
+                    break;
+                case 16 when dialog is IFeatureCharacterWithField feature: // blackout, only when does manager support character field
+                    if (shouldWait)
+                        yield return feature.GetCharacter(characterKey).Blackout(duration);
+                    else
+                        dialog.StartCoroutine(feature.GetCharacter(characterKey).Blackout(duration));
+                    break;
+                case 17 when dialog is IFeatureCharacterWithField feature:  // colorize, only when does manager support character field
+                    if (shouldWait)
+                        yield return feature.GetCharacter(characterKey).Colorize(duration);
+                    else
+                        dialog.StartCoroutine(feature.GetCharacter(characterKey).Colorize(duration));
+                    break;
             }
-            
+
             yield break;
         }
     }

@@ -183,5 +183,19 @@ namespace Nabuki
         {
             yield return events.Call(key);
         }
+
+        protected override void OnDialogueStart()
+        {
+            if (characters == null)
+                characters = new Dictionary<string, DialogueCharacter>();
+            foreach (var character in characters)
+                Destroy(character.Value.gameObject);
+            characters.Clear();
+        }
+
+        protected override void OnDialogueEnd()
+        {
+            
+        }
     }
 }
