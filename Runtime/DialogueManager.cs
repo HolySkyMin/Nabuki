@@ -43,6 +43,7 @@ namespace Nabuki
         public void PlayDirectly(string script)
         {
             Ended = false;
+            OnDialogueStart();
 
             _dialogue = _parser.Parse(script);
 
@@ -52,6 +53,8 @@ namespace Nabuki
         public void Play(string filePath)
         {
             Ended = false;
+            OnDialogueStart();
+
             StartCoroutine(Play_WithFileLoading(filePath));
         }
 
@@ -70,6 +73,7 @@ namespace Nabuki
             foreach (var data in _dialogue)
                 yield return data.Execute(this);
 
+            OnDialogueEnd();
             Ended = true;
         }
 
@@ -77,5 +81,9 @@ namespace Nabuki
         {
             _dialogue.CurrentPhase = phase;
         }
+
+        protected abstract void OnDialogueStart();
+
+        protected abstract void OnDialogueEnd();
     }
 }
