@@ -11,7 +11,7 @@ namespace Nabuki
         public bool animateText;
         public int cps;
 
-        public abstract IEnumerator ShowText(string talker, string text, int index, bool unskippable = false);
+        public abstract IEnumerator ShowText(string talker, string text, int localCps, bool unskippable = false);
 
         public abstract IEnumerator Appear();
 

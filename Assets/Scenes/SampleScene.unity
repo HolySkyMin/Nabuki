@@ -301,9 +301,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c91c1d83e7485cd40ae11c6ac08c3200, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialogToPlay: test_rc_script
-  manager: {fileID: 0}
-  stdAudio: {fileID: 0}
+  dialogToPlay: rc_tutorial_script
+  manager: {fileID: 191585889262288951}
+  stdAudio: {fileID: 191585889185845054}
 --- !u!4 &1492381414
 Transform:
   m_ObjectHideFlags: 0
@@ -3847,6 +3847,7 @@ MonoBehaviour:
   displayer: {fileID: 191585889610724051}
   enableLog: 1
   logger: {fileID: 191585889493825176}
+  playerKeyword: player
   selector: {fileID: 191585888044249008}
   characterTemplate: {fileID: 191585888732199649}
   characterField: {fileID: 191585889091579315}

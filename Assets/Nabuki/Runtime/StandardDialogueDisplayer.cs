@@ -15,7 +15,7 @@ namespace Nabuki
 
         bool visible = false;
 
-        public override IEnumerator ShowText(string talker, string text, int index, bool unskippable = false)
+        public override IEnumerator ShowText(string talker, string text, int localCps, bool unskippable = false)
         {
             if (!visible)
                 yield return Appear();
@@ -30,7 +30,7 @@ namespace Nabuki
                 proceeder.allowInput = !unskippable;
 
                 int i = 0;
-                float clock = 0f, spc = 1f / cps;
+                float clock = 0f, spc = 1f / (localCps > 0 ? localCps : cps);
 
                 bodyText.maxVisibleCharacters = 0;
                 yield return null;
