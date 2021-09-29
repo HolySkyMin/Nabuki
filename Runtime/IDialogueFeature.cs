@@ -7,6 +7,8 @@ namespace Nabuki
     public interface IFeatureCharacter
     {
         public void AddCharacter(string key, string name);
+        public void OverrideCharacterName(string key, string newName);
+        public void ResetCharacterName(string key);
         public bool CharacterExists(string key);
         public bool FindCharacterKey(string name, out string key);
         public bool FindCharacterName(string key, out string name);

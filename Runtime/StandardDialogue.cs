@@ -33,12 +33,15 @@ namespace Nabuki
         NbkData _data;
 
         Dictionary<string, DialogueCharacter> characters;
+        Dictionary<string, string> _characterOverridedName;
         Dictionary<string, System.Func<IEnumerator>> actions;
 
         protected void Awake()
         {
             characters = new Dictionary<string, DialogueCharacter>();
             actions = new Dictionary<string, System.Func<IEnumerator>>();
+
+            _characterOverridedName = new Dictionary<string, string>();
         }
 
         public void AddCharacter(string key, string cname)
@@ -60,6 +63,16 @@ namespace Nabuki
             }
         }
 
+        public void OverrideCharacterName(string key, string newName)
+        {
+            _characterOverridedName.Add(key, newName);
+        }
+
+        public void ResetCharacterName(string key)
+        {
+            _characterOverridedName.Remove(key);
+        }
+
         public bool CharacterExists(string key)
         {
             foreach (var character in characters)
@@ -74,7 +87,7 @@ namespace Nabuki
             {
                 if (character.Key == key)
                 {
-                    cname = character.Value.Name;
+                    cname = _characterOverridedName.ContainsKey(key) ? _characterOverridedName[key] : character.Value.Name;
                     return true;
                 }
             }
@@ -184,7 +197,7 @@ namespace Nabuki
             yield return events.Call(key);
         }
 
-        protected override void OnDialogueStart()
+        protected override void Initialize()
         {
             if (characters == null)
                 characters = new Dictionary<string, DialogueCharacter>();
@@ -193,9 +206,10 @@ namespace Nabuki
             characters.Clear();
         }
 
-        protected override void OnDialogueEnd()
+        public override string GetPlayerName()
         {
-            
+            return _characterOverridedName.ContainsKey(PlayerKeyword)
+                ? _characterOverridedName[PlayerKeyword] : _data.playerName;
         }
     }
 }

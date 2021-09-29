@@ -6,6 +6,8 @@ namespace Nabuki
 {
     public interface IDialogueData
     {
+        bool Accept(DialogueManager dialog);
+
         IEnumerator Execute(DialogueManager dialog);
     }
 }

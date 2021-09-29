@@ -20,12 +20,16 @@ namespace Nabuki
 
         public int Phase => _dialogue.CurrentPhase;
 
+        public string PlayerKeyword => playerKeyword;
+
         [Header("Universal Components")]
         [SerializeField] DialogueSource source;
         [SerializeField] DialogueDisplayer displayer;
         [SerializeField] bool enableLog;
         [ShowIf("enableLog")]
         [SerializeField] DialogueLogger logger;
+        [Header("General Config")]
+        [SerializeField] string playerKeyword = "player";
 
         DialogueDataCollection _dialogue;
         IDialogueParser _parser;
@@ -42,9 +46,9 @@ namespace Nabuki
 
         public void PlayDirectly(string script)
         {
-            Ended = false;
-            OnDialogueStart();
+            Initialize();
 
+            Ended = false;
             _dialogue = _parser.Parse(script);
 
             StartCoroutine(Play_Routine());
@@ -52,8 +56,9 @@ namespace Nabuki
 
         public void Play(string filePath)
         {
+            Initialize();
+
             Ended = false;
-            OnDialogueStart();
 
             StartCoroutine(Play_WithFileLoading(filePath));
         }
@@ -71,9 +76,11 @@ namespace Nabuki
         IEnumerator Play_Routine()
         {
             foreach (var data in _dialogue)
-                yield return data.Execute(this);
+            {
+                if (data.Accept(this))
+                    yield return data.Execute(this);
+            }
 
-            OnDialogueEnd();
             Ended = true;
         }
 
@@ -82,8 +89,15 @@ namespace Nabuki
             _dialogue.CurrentPhase = phase;
         }
 
-        protected abstract void OnDialogueStart();
+        public void SetPlayerKeyword(string keyword)
+        {
+            playerKeyword = keyword;
+        }
 
-        protected abstract void OnDialogueEnd();
+        public abstract string GetPlayerName();
+
+        protected abstract void Initialize();
+
+        protected virtual void OnDialogueEnd() { }
     }
 }
