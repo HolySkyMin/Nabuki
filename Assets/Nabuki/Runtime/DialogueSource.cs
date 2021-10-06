@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using NaughtyAttributes;
 #if ADDRESSABLE_EXISTS
 using UnityEngine.AddressableAssets;
 #endif
@@ -21,8 +22,8 @@ namespace Nabuki
     public class DialogueSource
     {
         [SerializeField] DialogueSourceType sourceType;
-        [SerializeField] string dialoguePath, imagePath, soundPath, objectPath;
-        [SerializeField] AssetBundle dialogueBundle, imageBundle, soundBundle, objectBundle;
+        [SerializeField, HideIf("sourceType", DialogueSourceType.AssetBundle)] string dialoguePath, imagePath, soundPath, objectPath;
+        [SerializeField, ShowIf("sourceType", DialogueSourceType.AssetBundle)] AssetBundle dialogueBundle, imageBundle, soundBundle, objectBundle;
 
         Dictionary<string, Sprite> spriteDic;
         Dictionary<string, AudioClip> audioDic;
@@ -106,15 +107,21 @@ namespace Nabuki
                         break;
 #if ADDRESSABLE_EXISTS
                     case DialogueSourceType.Addressable:
-                        var progress3 = Addressables.LoadAssetAsync<Sprite>(Path.Combine(imagePath, key));
-                        yield return new WaitUntil(() => progress3.IsDone);
-                        spriteDic.Add(key, progress3.Result);
+                        var pathProgress = Addressables.LoadResourceLocationsAsync(Path.Combine(imagePath, key));
+                        yield return pathProgress;
+
+                        if (pathProgress.Result.Count > 0)
+                        {
+                            var progress3 = Addressables.LoadAssetAsync<Sprite>(pathProgress.Result[0]);
+                            yield return progress3;
+                            spriteDic.Add(key, progress3.Result);
+                        }
                         break;
 #endif
                 }
             }
 
-            callback(spriteDic[key]);
+            callback(spriteDic.ContainsKey(key) ? spriteDic[key] : null);
             yield break;
         }
 

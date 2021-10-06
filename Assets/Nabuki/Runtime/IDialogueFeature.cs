@@ -18,6 +18,7 @@ namespace Nabuki
     {
         public void AddCharacter(string key, string name, int fieldIndex);
         public DialogueCharacter GetCharacter(string key);
+        public void HighlightCharacter(string key);
     }
 
     public interface IFeatureEffect

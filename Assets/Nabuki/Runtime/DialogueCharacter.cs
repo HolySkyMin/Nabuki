@@ -54,7 +54,7 @@ namespace Nabuki
 
         public abstract void Hide();
 
-        public abstract void SetSprite(Sprite sprite);
+        public abstract void SetSprite(Sprite sprite, string spriteKey);
 
         public abstract void SetScale(Vector3 scale);
 
