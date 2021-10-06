@@ -114,6 +114,20 @@ namespace Nabuki
             return characters[key];
         }
 
+        public void HighlightCharacter(string key)
+        {
+            foreach (var character in characters.Values)
+            {
+                if (character.Key == key)
+                {
+                    character.SetColor(Color.white);
+                    character.transform.SetAsLastSibling();
+                }
+                else
+                    character.SetColor(new Color(0.75f, 0.75f, 0.75f));
+            }
+        }
+
         public IEnumerator PlayEffect(string effect)
         {
             yield return null;

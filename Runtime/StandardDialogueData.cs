@@ -76,17 +76,23 @@ namespace Nabuki
                     case string s when s == dialog.PlayerKeyword:  // If talker is player, mark this dialogue as player's dialogue and get its name.
                         isPlayer = true;
                         realTalker = dialog.GetPlayerName();
+
+                        if (dialog is IFeatureCharacterWithField feature && feature.FindCharacterName(talker, out _))
+                            feature.HighlightCharacter(talker);
                         break;
                     case "none":  // Monologue.
                         realTalker = "";
                         break;
                     default:
-                        if (dialog is IFeatureCharacter feature)  // If dialogue supports character,
+                        if (dialog is IFeatureCharacter feature2)  // If dialogue supports character,
                         {
                             // Try finding its name.
-                            var registered = feature.FindCharacterName(talker, out realTalker);
+                            var registered = feature2.FindCharacterName(talker, out realTalker);
                             if (!registered)
                                 realTalker = talker;
+
+                            if (registered && dialog is IFeatureCharacterWithField featureEx)
+                                featureEx.HighlightCharacter(talker);
                         }
                         break;
                 }
@@ -217,7 +223,7 @@ namespace Nabuki
                         var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
                         yield return dialog.Source.GetSpriteAsync(fileName, (sprite) =>
                         {
-                            _feature.GetCharacter(characterKey).SetSprite(sprite);
+                            _feature.GetCharacter(characterKey).SetSprite(sprite, spriteKey);
                         });
                         break;
                     case 1:  // setpos
@@ -229,13 +235,13 @@ namespace Nabuki
                     case 3:  // setstate
                         switch (state)
                         {
-                            case 0:  // active (-) - does nothing. because default state is active!
+                            case 0:  // inactive (-) - does nothing. because default state is active!
                                 break;
                             case 1:  // inactive
-                                _feature.GetCharacter(characterKey).SetColor(new Color(0.5f, 0.5f, 0.5f, 1));
+                                _feature.GetCharacter(characterKey).SetColor(new Color(0.75f, 0.75f, 0.75f));
                                 break;
                             case 2:  // blackout
-                                _feature.GetCharacter(characterKey).SetColor(new Color(0, 0, 0, 1));
+                                _feature.GetCharacter(characterKey).SetColor(new Color(0, 0, 0));
                                 break;
                         }
                         break;

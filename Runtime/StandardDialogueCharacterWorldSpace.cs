@@ -40,7 +40,7 @@ namespace Nabuki
             body.gameObject.SetActive(false);
         }
 
-        public override void SetSprite(Sprite sprite)
+        public override void SetSprite(Sprite sprite, string spriteKey)
         {
             image.sprite = sprite == null ? defaultSprite : sprite;
         }
