@@ -112,7 +112,7 @@ namespace Nabuki
 
                         if (pathProgress.Result.Count > 0)
                         {
-                            var progress3 = Addressables.LoadAssetAsync<Sprite>(pathProgress.Result[0]);
+                            var progress3 = Addressables.LoadAssetAsync<Sprite>(Path.Combine(imagePath, key).Replace("\\", "/"));
                             yield return progress3;
                             spriteDic.Add(key, progress3.Result);
                         }
