@@ -1,9 +1,9 @@
 {
     "name": "com.holyskymin.nabuki",
     "displayName": "Nabuki",
-    "version": "0.8.2",
+    "version": "0.9.0",
     "unity": "2020.1",
-    "description": "Simple dialogue library for Unity.\n\nRequires .NET 4.x scripting runtime and API compatibility level.\n\nParallel Universe for Justice.",
+    "description": "Simple 2D dialogue library for Unity.\nRequires .NET 4.x scripting runtime and API compatibility level.\n\nNever forget the Parallel Universe.",
     "dependencies": {
         "com.unity.textmeshpro": "2.0.1",
         "com.dbrizov.naughtyattributes": "https://github.com/dbrizov/NaughtyAttributes.git#upm"

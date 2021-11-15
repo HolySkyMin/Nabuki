@@ -257,43 +257,55 @@ namespace Nabuki
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).Move(position, duration));
                         break;
-                    case 11:  // scale
+                    case 11:  // movex
+                        if (shouldWait)
+                            yield return _feature.GetCharacter(characterKey).MoveX(position.x, duration);
+                        else
+                            dialog.StartCoroutine(_feature.GetCharacter(characterKey).MoveX(position.x, duration));
+                        break;
+                    case 12:  // movey
+                        if (shouldWait)
+                            yield return _feature.GetCharacter(characterKey).MoveY(position.y, duration);
+                        else
+                            dialog.StartCoroutine(_feature.GetCharacter(characterKey).MoveY(position.y, duration));
+                        break;
+                    case 13:  // scale
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).Scale(scale, duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).Scale(scale, duration));
                         break;
-                    case 12:  // fadein
+                    case 14:  // fadein
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).FadeIn(duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).FadeIn(duration));
                         break;
-                    case 13:  // fadeout
+                    case 15:  // fadeout
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).FadeOut(duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).FadeOut(duration));
                         break;
-                    case 14:  // nodup
+                    case 16:  // nodup
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).NodUp();
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).NodUp());
                         break;
-                    case 15:  // noddown
+                    case 17:  // noddown
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).NodDown();
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).NodDown());
                         break;
-                    case 16:  // blackout
+                    case 18:  // blackout
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).Blackout(duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).Blackout(duration));
                         break;
-                    case 17:  // colorize
+                    case 19:  // colorize
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).Colorize(duration);
                         else
