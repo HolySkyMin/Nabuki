@@ -62,6 +62,10 @@ namespace Nabuki
 
         public abstract IEnumerator Move(Vector2 goal, float time);
 
+        public IEnumerator MoveX(float goal, float time) => Move(new Vector2(goal, Position.y), time);
+
+        public IEnumerator MoveY(float goal, float time) => Move(new Vector2(Position.x, goal), time);
+
         public abstract IEnumerator Scale(float goal, float time);
 
         public abstract IEnumerator FadeIn(float time);

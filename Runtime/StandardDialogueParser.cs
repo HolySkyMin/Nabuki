@@ -237,11 +237,39 @@ namespace Nabuki
                             if (tag.function == "wait")
                                 ((StandardDialogueData.CharacterAnimation)newCommand).shouldWait = true;
                         break;
-                    case "scale":
+                    case "movex":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.CharacterAnimation()
                         {
                             type = 11,
+                            characterKey = param[0].content,
+                            position = new Vector2(float.Parse(param[1].content), 0),
+                            duration = float.Parse(param[2].content)
+                        };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((StandardDialogueData.CharacterAnimation)newCommand).shouldWait = true;
+                        break;
+                    case "movey":
+                        param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value, NbkTokenType.Value);
+                        newCommand = new StandardDialogueData.CharacterAnimation()
+                        {
+                            type = 12,
+                            characterKey = param[0].content,
+                            position = new Vector2(0, float.Parse(param[1].content)),
+                            duration = float.Parse(param[2].content)
+                        };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((StandardDialogueData.CharacterAnimation)newCommand).shouldWait = true;
+                        break;
+                    case "scale":
+                        param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value, NbkTokenType.Value);
+                        newCommand = new StandardDialogueData.CharacterAnimation()
+                        {
+                            type = 13,
                             characterKey = param[0].content,
                             scale = float.Parse(param[1].content),
                             duration = float.Parse(param[2].content)
@@ -253,7 +281,7 @@ namespace Nabuki
                         break;
                     case "fadein":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
-                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 12, characterKey = param[0].content, duration = float.Parse(param[1].content) };
+                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 14, characterKey = param[0].content, duration = float.Parse(param[1].content) };
                         tags = tokenizer.GetTag();
                         foreach (var tag in tags)
                             if (tag.function == "wait")
@@ -261,7 +289,7 @@ namespace Nabuki
                         break;
                     case "fadeout":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
-                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 13, characterKey = param[0].content, duration = float.Parse(param[1].content) };
+                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 15, characterKey = param[0].content, duration = float.Parse(param[1].content) };
                         tags = tokenizer.GetTag();
                         foreach (var tag in tags)
                             if (tag.function == "wait")
@@ -269,7 +297,7 @@ namespace Nabuki
                         break;
                     case "nodup":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
-                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 14, characterKey = param[0].content };
+                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 16, characterKey = param[0].content };
                         tags = tokenizer.GetTag();
                         foreach (var tag in tags)
                             if (tag.function == "wait")
@@ -277,7 +305,7 @@ namespace Nabuki
                         break;
                     case "noddown":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
-                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 15, characterKey = param[0].content };
+                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 17, characterKey = param[0].content };
                         tags = tokenizer.GetTag();
                         foreach (var tag in tags)
                             if (tag.function == "wait")
@@ -285,7 +313,7 @@ namespace Nabuki
                         break;
                     case "colorize":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
-                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 17, characterKey = param[0].content, duration = float.Parse(param[1].content) };
+                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 18, characterKey = param[0].content, duration = float.Parse(param[1].content) };
                         tags = tokenizer.GetTag();
                         foreach (var tag in tags)
                             if (tag.function == "wait")
