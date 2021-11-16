@@ -106,6 +106,8 @@ namespace Nabuki
                             data.Add(phase, new List<IDialogueData>());
                         return;
 
+                    // ============ BASE SYSTEM
+
                     case "define" when manager is IFeatureVariable feature:
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         feature.VariableData.CreateVariable(param[0].content, param[1].content);
@@ -119,14 +121,17 @@ namespace Nabuki
                         newCommand = new StandardDialogueData.BaseSystem() { type = 2, phase = int.Parse(param[0].content) };
                         break;
                     case "playmusic":
+                    case "play-music":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.BaseSystem() { type = 3, musicKey = param[0].content };
                         break;
                     case "playse":
+                    case "play-se":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.BaseSystem() { type = 4, musicKey = param[0].content };
                         break;
                     case "waitfor":
+                    case "wait":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.BaseSystem() { type = 5, duration = float.Parse(param[0].content) };
                         break;
@@ -138,6 +143,8 @@ namespace Nabuki
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.BaseSystem() { type = 10, variableKey = param[0].content };
                         break;
+
+                    // ============ SELECTION
 
                     case "select":
                         newCommand = StandardDialogueData.CreateSelection();
@@ -164,24 +171,30 @@ namespace Nabuki
                         }
                         break;
 
+                    // ============ CHARACTER & CHARACTER ANIMATION
+
                     case "character":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Character() { type = 0, characterKey = param[0].content, characterName = param[1].content };
                         break;
                     case "hidename":
+                    case "hide-name":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Character() { type = 1, characterKey = param[0].content, characterName = param[1].content };
                         break;
                     case "showname":
+                    case "show-name":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Character() { type = 2, characterKey = param[0].content };
                         break;
                     case "setsprite":
+                    case "set-char-sprite":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.CharacterAnimation()
                         { type = 0, characterKey = param[0].content, spriteKey = param[1].content };
                         break;
                     case "setpos":
+                    case "set-char-pos":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Tuple);
                         newCommand = new StandardDialogueData.CharacterAnimation()
                         {
@@ -191,10 +204,12 @@ namespace Nabuki
                         };
                         break;
                     case "setsize":
+                    case "set-char-size":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.CharacterAnimation() { type = 2, characterKey = param[0].content, scale = float.Parse(param[1].content) };
                         break;
                     case "setstate":
+                    case "set-char-state":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.CharacterAnimation() { type = 3, characterKey = param[0].content };
                         switch (param[1].content)
@@ -206,6 +221,7 @@ namespace Nabuki
                         }
                         break;
                     case "setchar":
+                    case "set-char":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value, NbkTokenType.Tuple, NbkTokenType.Value);
                         ParseLine(ref data, ref phase, $"\tsetsprite\t{param[0].content}\t{param[1].content}");
                         ParseLine(ref data, ref phase, $"\tsetpos\t{param[0].content}\t{param[2].content}");
@@ -311,7 +327,7 @@ namespace Nabuki
                             if (tag.function == "wait")
                                 ((StandardDialogueData.CharacterAnimation)newCommand).shouldWait = true;
                         break;
-                    case "colorize":
+                    case "blackout":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.CharacterAnimation() { type = 18, characterKey = param[0].content, duration = float.Parse(param[1].content) };
                         tags = tokenizer.GetTag();
@@ -319,8 +335,38 @@ namespace Nabuki
                             if (tag.function == "wait")
                                 ((StandardDialogueData.CharacterAnimation)newCommand).shouldWait = true;
                         break;
+                    case "colorize":
+                        param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
+                        newCommand = new StandardDialogueData.CharacterAnimation() { type = 19, characterKey = param[0].content, duration = float.Parse(param[1].content) };
+                        tags = tokenizer.GetTag();
+                        foreach (var tag in tags)
+                            if (tag.function == "wait")
+                                ((StandardDialogueData.CharacterAnimation)newCommand).shouldWait = true;
+                        break;
+                    case "colorize-fadein":
+                        param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
+                        ParseLine(ref data, ref phase, $"\tsetstate\t{param[0].content}\tblackout");
+
+                        var totalDuration = float.Parse(param[1].content);
+                        data[phase].Add(
+                            new StandardDialogueData.CharacterAnimation() { type = 14, characterKey = param[0].content, duration = totalDuration / 2, shouldWait = true });
+                        newCommand =
+                            new StandardDialogueData.CharacterAnimation() { type = 19, characterKey = param[0].content, duration = totalDuration / 2, shouldWait = true };
+                        break;
+                    case "blackout-fadeout":
+                        param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
+
+                        var totalDuration2 = float.Parse(param[1].content);
+                        data[phase].Add(
+                            new StandardDialogueData.CharacterAnimation() { type = 18, characterKey = param[0].content, duration = totalDuration2 / 2, shouldWait = true });
+                        newCommand =
+                            new StandardDialogueData.CharacterAnimation() { type = 15, characterKey = param[0].content, duration = totalDuration2 / 2, shouldWait = true };
+                        break;
+
+                    // ============ BACKGROUND, FOREGROUND & SCENE ANIMATION
 
                     case "scenefadein":
+                    case "fadein-scene":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Transition() { type = 0, duration = float.Parse(param[0].content) };
                         tags = tokenizer.GetTag();
@@ -329,6 +375,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Transition)newCommand).shouldWait = true;
                         break;
                     case "scenefadeout":
+                    case "fadeout-scene":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Transition() { type = 1, duration = float.Parse(param[0].content) };
                         tags = tokenizer.GetTag();
@@ -336,7 +383,14 @@ namespace Nabuki
                             if (tag.function == "wait")
                                 ((StandardDialogueData.Transition)newCommand).shouldWait = true;
                         break;
+                    case "show-ui":
+                        newCommand = new StandardDialogueData.Transition() { type = 2 };
+                        break;
+                    case "hide-ui":
+                        newCommand = new StandardDialogueData.Transition() { type = 3 };
+                        break;
                     case "setbg":
+                    case "set-bg":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Tuple, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Background()
                         {
@@ -346,6 +400,7 @@ namespace Nabuki
                             scale = float.Parse(param[2].content)
                         }; break;
                     case "setfg":
+                    case "set-fg":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Tuple, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Foreground()
                         {
@@ -356,18 +411,23 @@ namespace Nabuki
                         };
                         break;
                     case "bgshow":
+                    case "show-bg":
                         newCommand = new StandardDialogueData.Background() { type = 1 };
                         break;
                     case "fgshow":
+                    case "show-fg":
                         newCommand = new StandardDialogueData.Foreground() { type = 1 };
                         break;
                     case "bghide":
+                    case "hide-bg":
                         newCommand = new StandardDialogueData.Background() { type = 2 };
                         break;
                     case "fghide":
+                    case "hide-fg":
                         newCommand = new StandardDialogueData.Foreground() { type = 2 };
                         break;
                     case "bgfadein":
+                    case "fadein-bg":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Background() { type = 10, duration = float.Parse(param[0].content) };
                         tags = tokenizer.GetTag();
@@ -376,6 +436,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Background)newCommand).shouldWait = true;
                         break;
                     case "fgfadein":
+                    case "fadein-fg":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Foreground() { type = 10, duration = float.Parse(param[0].content) };
                         tags = tokenizer.GetTag();
@@ -384,6 +445,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Foreground)newCommand).shouldWait = true;
                         break;
                     case "bgfadeout":
+                    case "fadeout-bg":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Background() { type = 11, duration = float.Parse(param[0].content) };
                         tags = tokenizer.GetTag();
@@ -392,6 +454,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Background)newCommand).shouldWait = true;
                         break;
                     case "fgfadeout":
+                    case "fadeout-fg":
                         param = tokenizer.GetParameter(NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Foreground() { type = 11, duration = float.Parse(param[0].content) };
                         tags = tokenizer.GetTag();
@@ -400,6 +463,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Foreground)newCommand).shouldWait = true;
                         break;
                     case "bgcrossfade":
+                    case "crossfade-bg":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Background()
                         {
@@ -413,6 +477,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Background)newCommand).shouldWait = true;
                         break;
                     case "fgcrossfade":
+                    case "crossfade-fg":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Foreground()
                         {
@@ -426,6 +491,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Foreground)newCommand).shouldWait = true;
                         break;
                     case "bgmove":
+                    case "move-bg":
                         param = tokenizer.GetParameter(NbkTokenType.Tuple, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Background()
                         {
@@ -439,6 +505,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Background)newCommand).shouldWait = true;
                         break;
                     case "fgmove":
+                    case "move-fg":
                         param = tokenizer.GetParameter(NbkTokenType.Tuple, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Foreground()
                         {
@@ -452,6 +519,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Foreground)newCommand).shouldWait = true;
                         break;
                     case "bgscale":
+                    case "scale-bg":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Background()
                         {
@@ -465,6 +533,7 @@ namespace Nabuki
                                 ((StandardDialogueData.Background)newCommand).shouldWait = true;
                         break;
                     case "fgscale":
+                    case "scale-fg":
                         param = tokenizer.GetParameter(NbkTokenType.Value, NbkTokenType.Value);
                         newCommand = new StandardDialogueData.Foreground()
                         {
@@ -477,6 +546,8 @@ namespace Nabuki
                             if (tag.function == "wait")
                                 ((StandardDialogueData.Foreground)newCommand).shouldWait = true;
                         break;
+
+                    // ============ ETC
 
                     case "": return;
                     default:

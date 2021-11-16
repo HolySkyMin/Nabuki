@@ -345,6 +345,12 @@ namespace Nabuki
                         else
                             dialog.StartCoroutine(_feature.SceneFadeOut(duration));
                         break;
+                    case 2:  // show-ui
+                        yield return dialog.Displayer.Appear();
+                        break;
+                    case 3:  // hide-ui
+                        yield return dialog.Displayer.Disappear();
+                        break;
                 }
             }
         }
