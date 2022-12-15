@@ -21,7 +21,7 @@ namespace Nabuki
         public IEnumerator ShowSelect(Dictionary<int, string> selects, Action<int> callback)
         {
             hasResult = false;
-            proceeder.allowInput = false;
+            proceeder.AllowInput = false;
 
             foreach (var obj in buttons)
                 Destroy(obj);

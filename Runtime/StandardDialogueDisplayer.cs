@@ -8,29 +8,33 @@ namespace Nabuki
     [RequireComponent(typeof(CanvasGroup))]
     public class StandardDialogueDisplayer : DialogueDisplayer
     {
-        public DialogueProceeder proceeder;
-        public TMP_Text nameText, bodyText;
-        public GameObject nameTag, endIndicator, unskipIndicator;
-        public bool removeNametagWhenNull;
+        [SerializeField] DialogueProceeder proceeder;
+        [SerializeField] TMP_Text nameText, bodyText;
+        [SerializeField] GameObject nameTag, endIndicator, unskipIndicator;
+        [SerializeField] bool removeNametagWhenNull;
 
-        bool visible = false;
+        public override void Initialize()
+        {
+            base.IsVisible = false;
+            nameText.SetText(string.Empty);
+            bodyText.SetText(string.Empty);
+        }
 
         public override IEnumerator ShowText(string talker, string text, int localCps, bool unskippable = false)
         {
-            if (!visible)
-                yield return Appear();
+            base.IsVisible = true;
 
             nameTag.SetActive(talker != "" || !removeNametagWhenNull);
             nameText.SetText(talker);
             bodyText.SetText(text);
 
-            if (animateText)
+            if (AnimatesText)
             {
                 unskipIndicator.SetActive(unskippable);
-                proceeder.allowInput = !unskippable;
+                proceeder.AllowInput = !unskippable;
 
                 int i = 0;
-                float clock = 0f, spc = 1f / (localCps > 0 ? localCps : cps);
+                float clock = 0f, spc = 1f / (localCps > 0 ? localCps : CPS);
 
                 bodyText.maxVisibleCharacters = 0;
                 yield return null;
@@ -43,9 +47,9 @@ namespace Nabuki
                         bodyText.maxVisibleCharacters = i;
                     }
 
-                    if (!unskippable && proceeder.hasInput)
+                    if (proceeder.AllowInput && proceeder.HasInput)
                     {
-                        proceeder.hasInput = false;
+                        proceeder.AllowInput = false;
                         break;
                     }
 
@@ -56,9 +60,9 @@ namespace Nabuki
             }
 
             endIndicator.SetActive(true);
-            proceeder.allowInput = true;
-            yield return new WaitUntil(() => proceeder.hasInput);
-            proceeder.hasInput = false;
+            proceeder.AllowInput = true;
+            yield return new WaitUntil(() => proceeder.HasInput);
+            proceeder.AllowInput = false;
             endIndicator.SetActive(false);
         }
 
@@ -66,7 +70,6 @@ namespace Nabuki
         {
             var cg = GetComponent<CanvasGroup>();
             cg.alpha = 1;
-            visible = true;
             yield break;
         }
 
@@ -74,7 +77,6 @@ namespace Nabuki
         {
             var cg = GetComponent<CanvasGroup>();
             cg.alpha = 0;
-            visible = false;
             yield break;
         }
     }

@@ -218,6 +218,8 @@ namespace Nabuki
             foreach (var character in characters)
                 Destroy(character.Value.gameObject);
             characters.Clear();
+            background.Hide();
+            foreground.Hide();
         }
 
         public override string GetPlayerName()

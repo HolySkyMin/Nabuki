@@ -13,6 +13,11 @@ namespace Nabuki
         public int indent;
         public int voiceSpriteIndex;
 
+        public void Initialize()
+        {
+            log.SetText(string.Empty);
+        }
+
         public void Log(string talker, string text, string voiceKey, bool isPlayer)
         {
             log.text += $"\n\n<color={(isPlayer ? playerColor : characterColor)}>{talker}</color>"
