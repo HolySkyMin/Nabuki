@@ -15,14 +15,14 @@ namespace Nabuki
 
         public override void Initialize()
         {
-            base.IsVisible = false;
+            base.SetVisible(false);
             nameText.SetText(string.Empty);
             bodyText.SetText(string.Empty);
         }
 
         public override IEnumerator ShowText(string talker, string text, int localCps, bool unskippable = false)
         {
-            base.IsVisible = true;
+            yield return base.SetVisible(true);
 
             nameTag.SetActive(talker != "" || !removeNametagWhenNull);
             nameText.SetText(talker);

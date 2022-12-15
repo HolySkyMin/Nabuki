@@ -11,28 +11,26 @@ namespace Nabuki
 
         public bool AnimatesText => animateText;
 
-        public bool IsVisible
-        {
-            get => _isVisible;
-            set
-            {
-                var valueChanged = _isVisible ^ value;
-                _isVisible = value;
-
-                if(valueChanged)
-                {
-                    if (_isVisible)
-                        StartCoroutine(Appear());
-                    else
-                        StartCoroutine(Disappear());
-                }
-            }
-        }
-
         [SerializeField] bool animateText;
         [SerializeField] int cps;
 
         bool _isVisible;
+
+        public IEnumerator SetVisible(bool visible)
+        {
+            var valueChanged = _isVisible ^ visible;
+            _isVisible = visible;
+
+            if(valueChanged)
+            {
+                if (_isVisible)
+                    yield return Appear();
+                else
+                    yield return Disappear();
+            }
+            else
+                yield break;
+        }
 
         public abstract void Initialize();
 

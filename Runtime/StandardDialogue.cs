@@ -220,6 +220,10 @@ namespace Nabuki
             characters.Clear();
             background.Hide();
             foreground.Hide();
+            if (useUIField)
+                fieldDimmerUI.gameObject.SetActive(false);
+            else
+                fieldDimmerWorld.gameObject.SetActive(false);
         }
 
         public override string GetPlayerName()
