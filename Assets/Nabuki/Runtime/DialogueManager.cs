@@ -88,7 +88,10 @@ namespace Nabuki
         /// <returns></returns>
         public IEnumerator PlayAsync(string filePath)
         {
+            // Initializes everything.
             Initialize();
+            displayer.Initialize();
+            logger.Initialize();
             Ended = false;
 
             string textData = string.Empty;
