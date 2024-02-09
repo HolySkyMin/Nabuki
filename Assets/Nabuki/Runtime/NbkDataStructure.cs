@@ -39,7 +39,7 @@ namespace Nabuki
             if (left.type == NbkVariableType.Int)
                 return left.ToInt() == right.ToInt();
             else if (left.type == NbkVariableType.Float)
-                return left.ToFloat() == right.ToFloat();
+                return Math.Abs(left.ToFloat() - right.ToFloat()) < 0.00001f;
             else if (left.type == NbkVariableType.Bool)
                 return left.ToBool() == right.ToBool();
             else

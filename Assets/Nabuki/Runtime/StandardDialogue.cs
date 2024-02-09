@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if NAUGHTY_ATTRIBUTE_EXISTS
+using NaughtyAttributes;
+#endif
 
 namespace Nabuki
 {
@@ -26,8 +29,13 @@ namespace Nabuki
         [SerializeField] DialogueBackground foreground;
         [SerializeField] DialogueEvent events;
         [SerializeField] bool useUIField;
-        [SerializeField, NaughtyAttributes.ShowIf("useUIField")] CanvasGroup fieldDimmerUI;
-        [SerializeField, NaughtyAttributes.HideIf("useUIField")] SpriteRenderer fieldDimmerWorld;
+#if NAUGHTY_ATTRIBUTE_EXISTS
+        [SerializeField, ShowIf("useUIField")] CanvasGroup fieldDimmerUI;
+        [SerializeField, HideIf("useUIField")] SpriteRenderer fieldDimmerWorld;
+#else
+        [SerializeField] CanvasGroup fieldDimmerUI;
+        [SerializeField] SpriteRenderer fieldDimmerWorld;
+#endif
 
         IDialogueAudio _audio;
         NbkData _data;

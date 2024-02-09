@@ -6,7 +6,9 @@ using UnityEngine;
 #if ADDRESSABLE_EXISTS
 using UnityEngine.AddressableAssets;
 #endif
+#if NAUGHTY_ATTRIBUTE_EXISTS
 using NaughtyAttributes;
+#endif
 
 namespace Nabuki
 {
@@ -23,10 +25,19 @@ namespace Nabuki
         }
 
         [SerializeField] SourceType sourceType;
+#if NAUGHTY_ATTRIBUTE_EXISTS
         [SerializeField, HideIf("sourceType", SourceType.Custom)] string dialoguePath, imagePath, soundPath, objectPath;
         [SerializeField, ShowIf("sourceType", SourceType.Custom)] DialogueSourceProvider provider;
+#else
+        [SerializeField] string dialoguePath, imagePath, soundPath, objectPath;
+        [SerializeField] DialogueSourceProvider provider;
+#endif
 #if ADDRESSABLE_EXISTS
+#if NAUGHTY_ATTRIBUTE_EXISTS
         [SerializeField, ShowIf("sourceType", SourceType.Addressable)] bool useFormatPath;
+#else
+        [SerializeField] bool useFormatPath;
+#endif
 #endif
 
         Dictionary<string, Sprite> spriteDic;

@@ -7,9 +7,30 @@ namespace Nabuki
 {
     public static class StandardDialogueData
     {
-        public class BaseSystem : IDialogueData
+        public enum SystemCommand
         {
-            public int type;
+            DefineValue, SetValue, ChangePhase, PlayMusic, PlaySoundEffect, Wait, SetPlayer, CallAction
+        }
+
+        public enum CharacterCommand
+        {
+            Add, HideName, ShowName, SetSprite, SetPosition, SetSize, SetState,
+            Show, Hide, Move, MoveX, MoveY, Scale, FadeIn, FadeOut, NodUp, NodDown, Blackout, Colorize
+        }
+
+        public enum TransitionCommand
+        {
+            SceneFadeIn, SceneFadeOut, ShowUI, HideUI
+        }
+
+        public enum BackgroundCommand
+        {
+            Set, Show, Hide, FadeIn, FadeOut, CrossFade, Move, Scale
+        }
+        
+        public class System : IDialogueData
+        {
+            public SystemCommand command;
             public int phase;
             public float duration;
             public string musicKey;
@@ -23,30 +44,30 @@ namespace Nabuki
 
             public IEnumerator Execute(DialogueManager dialog)
             {
-                switch (type)
+                switch (command)
                 {
-                    case 0 when dialog is IFeatureVariable fVariable: // define: create a variable
+                    case SystemCommand.DefineValue when dialog is IFeatureVariable fVariable:
                         fVariable.VariableData.CreateVariable(variableKey, value);
                         yield break;
-                    case 1 when dialog is IFeatureVariable fVariable: // set: change variable's value
+                    case SystemCommand.SetValue when dialog is IFeatureVariable fVariable:
                         fVariable.VariableData.SetVariable(variableKey, value);
                         yield break;
-                    case 2: // nextphase: set next phase
+                    case SystemCommand.ChangePhase:
                         dialog.SetPhase(phase);
                         yield break;
-                    case 3 when dialog is IFeatureAudio fAudio: // playmusic: play music
+                    case SystemCommand.PlayMusic when dialog is IFeatureAudio fAudio:
                         fAudio.Audio.PlayBGM(musicKey);
                         yield break;
-                    case 4 when dialog is IFeatureAudio fAudio: // playse: play sound effect
+                    case SystemCommand.PlaySoundEffect when dialog is IFeatureAudio fAudio:
                         fAudio.Audio.PlaySE(musicKey);
                         yield break;
-                    case 5: // waitfor
+                    case SystemCommand.Wait:
                         yield return new WaitForSeconds(duration);
                         break;
-                    case 6: // setplayer
+                    case SystemCommand.SetPlayer:
                         dialog.SetPlayerKeyword(value);
                         break;
-                    case 10 when dialog is IFeatureExternalAction feature: // call
+                    case SystemCommand.CallAction when dialog is IFeatureExternalAction feature:
                         yield return feature.CallAction(variableKey);
                         break;
                 }
@@ -161,7 +182,7 @@ namespace Nabuki
 
         public class Character : IDialogueData
         {
-            public int type;
+            public CharacterCommand command;
             public string characterKey;
             public string characterName;
             public int slotIndex;
@@ -176,18 +197,18 @@ namespace Nabuki
 
             public IEnumerator Execute(DialogueManager dialog)
             {
-                switch (type)
+                switch (command)
                 {
-                    case 0: // character
+                    case CharacterCommand.Add:
                         if (dialog is IFeatureCharacterWithField featurePlus)
                             featurePlus.AddCharacter(characterKey, characterName, slotIndex);
                         else
                             feature.AddCharacter(characterKey, characterName);
                         break;
-                    case 1: // hidename
+                    case CharacterCommand.HideName:
                         feature.OverrideCharacterName(characterKey, characterName);
                         break;
-                    case 2: // showname
+                    case CharacterCommand.ShowName:
                         feature.ResetCharacterName(characterKey);
                         break;
                 }
@@ -198,7 +219,7 @@ namespace Nabuki
 
         public class CharacterAnimation : IDialogueData
         {
-            public int type;
+            public CharacterCommand command;
             public string characterKey;
             public string spriteKey;
             public Vector2 position;
@@ -217,22 +238,22 @@ namespace Nabuki
 
             public IEnumerator Execute(DialogueManager dialog)
             {
-                switch (type)
+                switch (command)
                 {
-                    case 0: // setsprite
+                    case CharacterCommand.SetSprite:
                         var fileName = string.Format("{0}_{1}", characterKey, spriteKey);
                         yield return dialog.Source.GetSpriteAsync(fileName, (sprite) =>
                         {
                             _feature.GetCharacter(characterKey).SetSprite(sprite, spriteKey);
                         });
                         break;
-                    case 1:  // setpos
+                    case CharacterCommand.SetPosition:
                         _feature.GetCharacter(characterKey).SetPosition(position);
                         break;
-                    case 2:  // setsize
+                    case CharacterCommand.SetSize:
                         _feature.GetCharacter(characterKey).SetScale(new Vector3(scale, scale, 1));
                         break;
-                    case 3:  // setstate
+                    case CharacterCommand.SetState:
                         switch (state)
                         {
                             case 0:  // inactive (-) - does nothing. because default state is active!
@@ -245,67 +266,67 @@ namespace Nabuki
                                 break;
                         }
                         break;
-                    case 4:  // show
+                    case CharacterCommand.Show:
                         _feature.GetCharacter(characterKey).Show();
                         break;
-                    case 5:  // hide
+                    case CharacterCommand.Hide:
                         _feature.GetCharacter(characterKey).Hide();
                         break;
-                    case 10:  // move - animation index starts with 10
+                    case CharacterCommand.Move:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).Move(position, duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).Move(position, duration));
                         break;
-                    case 11:  // movex
+                    case CharacterCommand.MoveX:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).MoveX(position.x, duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).MoveX(position.x, duration));
                         break;
-                    case 12:  // movey
+                    case CharacterCommand.MoveY:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).MoveY(position.y, duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).MoveY(position.y, duration));
                         break;
-                    case 13:  // scale
+                    case CharacterCommand.Scale:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).Scale(scale, duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).Scale(scale, duration));
                         break;
-                    case 14:  // fadein
+                    case CharacterCommand.FadeIn:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).FadeIn(duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).FadeIn(duration));
                         break;
-                    case 15:  // fadeout
+                    case CharacterCommand.FadeOut:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).FadeOut(duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).FadeOut(duration));
                         break;
-                    case 16:  // nodup
+                    case CharacterCommand.NodUp:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).NodUp();
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).NodUp());
                         break;
-                    case 17:  // noddown
+                    case CharacterCommand.NodDown:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).NodDown();
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).NodDown());
                         break;
-                    case 18:  // blackout
+                    case CharacterCommand.Blackout:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).Blackout(duration);
                         else
                             dialog.StartCoroutine(_feature.GetCharacter(characterKey).Blackout(duration));
                         break;
-                    case 19:  // colorize
+                    case CharacterCommand.Colorize:
                         if (shouldWait)
                             yield return _feature.GetCharacter(characterKey).Colorize(duration);
                         else
@@ -317,7 +338,7 @@ namespace Nabuki
 
         public class Transition : IDialogueData
         {
-            public int type;
+            public TransitionCommand command;
             public float duration;
             public bool shouldWait;
 
@@ -331,24 +352,24 @@ namespace Nabuki
 
             public IEnumerator Execute(DialogueManager dialog)
             {
-                switch(type)
+                switch(command)
                 {
-                    case 0:  // scenefadein
+                    case TransitionCommand.SceneFadeIn:
                         if (shouldWait)
                             yield return _feature.SceneFadeIn(duration);
                         else
                             dialog.StartCoroutine(_feature.SceneFadeIn(duration));
                         break;
-                    case 1:  // scenefadeout
+                    case TransitionCommand.SceneFadeOut:
                         if (shouldWait)
                             yield return _feature.SceneFadeOut(duration);
                         else
                             dialog.StartCoroutine(_feature.SceneFadeOut(duration));
                         break;
-                    case 2:  // show-ui
+                    case TransitionCommand.ShowUI:
                         yield return dialog.Displayer.SetVisible(true);
                         break;
-                    case 3:  // hide-ui
+                    case TransitionCommand.HideUI:
                         yield return dialog.Displayer.SetVisible(false);
                         break;
                 }
@@ -357,7 +378,7 @@ namespace Nabuki
 
         public class Background : IDialogueData
         {
-            public int type;
+            public BackgroundCommand command;
             public string spriteKey;
             public Vector2 position;
             public float scale;
@@ -374,9 +395,9 @@ namespace Nabuki
 
             public IEnumerator Execute(DialogueManager dialog)
             {
-                switch (type)
+                switch (command)
                 {
-                    case 0: // setbg
+                    case BackgroundCommand.Set:
                         yield return dialog.Source.GetSpriteAsync(spriteKey, (sprite) =>
                         {
                             _feature.Background.SetSprite(sprite);
@@ -384,25 +405,25 @@ namespace Nabuki
                             _feature.Background.SetScale(scale);
                         });
                         break;
-                    case 1: // bgshow
+                    case BackgroundCommand.Show:
                         _feature.Background.Show();
                         break;
-                    case 2: // bghide
+                    case BackgroundCommand.Hide:
                         _feature.Background.Hide();
                         break;
-                    case 10: // bgfadein, tweening starts from type 10
+                    case BackgroundCommand.FadeIn:
                         if (shouldWait)
                             yield return _feature.Background.FadeIn(duration);
                         else
                             dialog.StartCoroutine(_feature.Background.FadeIn(duration));
                         break;
-                    case 11: // bgfadeout
+                    case BackgroundCommand.FadeOut:
                         if (shouldWait)
                             yield return _feature.Background.FadeOut(duration);
                         else
                             dialog.StartCoroutine(_feature.Background.FadeOut(duration));
                         break;
-                    case 12: // bgcrossfade
+                    case BackgroundCommand.CrossFade:
                         Sprite sprite_7 = null;
                         yield return dialog.Source.GetSpriteAsync(spriteKey, sprite => { sprite_7 = sprite; });
 
@@ -411,13 +432,13 @@ namespace Nabuki
                         else
                             dialog.StartCoroutine(_feature.Background.CrossFade(sprite_7, duration));
                         break;
-                    case 13: // bgmove
+                    case BackgroundCommand.Move: 
                         if (shouldWait)
                             yield return _feature.Background.Move(position, duration);
                         else
                             dialog.StartCoroutine(_feature.Background.Move(position, duration));
                         break;
-                    case 14: // bgscale
+                    case BackgroundCommand.Scale:
                         if (shouldWait)
                             yield return _feature.Background.Scale(scale, duration);
                         else
@@ -429,7 +450,7 @@ namespace Nabuki
 
         public class Foreground : IDialogueData
         {
-            public int type;
+            public BackgroundCommand command;
             public string spriteKey;
             public Vector2 position;
             public float scale;
@@ -446,9 +467,9 @@ namespace Nabuki
 
             public IEnumerator Execute(DialogueManager dialog)
             {
-                switch (type)
+                switch (command)
                 {
-                    case 0: // setfg
+                    case BackgroundCommand.Set:
                         yield return dialog.Source.GetSpriteAsync(spriteKey, (sprite) =>
                         {
                             _feature.Foreground.SetSprite(sprite);
@@ -456,25 +477,25 @@ namespace Nabuki
                             _feature.Foreground.SetScale(scale);
                         });
                         break;
-                    case 1: // fgshow
+                    case BackgroundCommand.Show:
                         _feature.Foreground.Show();
                         break;
-                    case 2: // fghide
+                    case BackgroundCommand.Hide:
                         _feature.Foreground.Hide();
                         break;
-                    case 10: // fgfadein, tweening starts from type 10
+                    case BackgroundCommand.FadeIn:
                         if (shouldWait)
                             yield return _feature.Foreground.FadeIn(duration);
                         else
                             dialog.StartCoroutine(_feature.Foreground.FadeIn(duration));
                         break;
-                    case 11: // fgfadeout
+                    case BackgroundCommand.FadeOut:
                         if (shouldWait)
                             yield return _feature.Foreground.FadeOut(duration);
                         else
                             dialog.StartCoroutine(_feature.Foreground.FadeOut(duration));
                         break;
-                    case 12: // fgcrossfade
+                    case BackgroundCommand.CrossFade:
                         Sprite sprite_7 = null;
                         yield return dialog.Source.GetSpriteAsync(spriteKey, sprite => { sprite_7 = sprite; });
 
@@ -483,13 +504,13 @@ namespace Nabuki
                         else
                             dialog.StartCoroutine(_feature.Foreground.CrossFade(sprite_7, duration));
                         break;
-                    case 13: // fgmove
+                    case BackgroundCommand.Move:
                         if (shouldWait)
                             yield return _feature.Foreground.Move(position, duration);
                         else
                             dialog.StartCoroutine(_feature.Foreground.Move(position, duration));
                         break;
-                    case 14: // fgscale
+                    case BackgroundCommand.Scale:
                         if (shouldWait)
                             yield return _feature.Foreground.Scale(scale, duration);
                         else

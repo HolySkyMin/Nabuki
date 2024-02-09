@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+#if NAUGHTY_ATTRIBUTE_EXISTS
 using NaughtyAttributes;
+#endif
 
 namespace Nabuki
 {
@@ -37,11 +39,6 @@ namespace Nabuki
         public bool Ended { get; private set; }
 
         /// <summary>
-        /// Current phase of the dialogue.
-        /// </summary>
-        public int Phase => _dialogue.CurrentPhase;
-
-        /// <summary>
         /// Current keyword of player. This is used only when no characters are designated as player.
         /// </summary>
         public string PlayerKeyword => playerKeyword;
@@ -49,27 +46,33 @@ namespace Nabuki
         [Header("Universal Components")]
         [SerializeField] DialogueSource source;
         [SerializeField] DialogueDisplayer displayer;
-        [SerializeField] bool enableLog;
-        [ShowIf("enableLog")]
-        [SerializeField] DialogueLogger logger;
         [Header("General Config")]
+        [SerializeField] bool enableLog;
+#if NAUGHTY_ATTRIBUTE_EXISTS
+        [ShowIf("enableLog")]
+#endif
+        [SerializeField] DialogueLogger logger;
         [SerializeField] string playerKeyword = "player";
 
-        DialogueDataCollection _dialogue;
-        IDialogueParser _parser;
+        private IDialogueRuntime _runtime;
 
         protected void OnDestroy()
         {
             source.Dispose();
         }
 
-        /// <summary>
-        /// Sets the dialogue parser.
-        /// </summary>
-        /// <param name="parser">Parser object which implements <see cref="IDialogueParser"/> interface.</param>
-        public void SetParser(IDialogueParser parser)
+        public void SetPhase(int phase)
         {
-            _parser = parser;
+            _runtime.ChangePhase(phase);
+        }
+
+        /// <summary>
+        /// Sets the runtime.
+        /// </summary>
+        /// <param name="runtime"></param>
+        public void SetRuntime(IDialogueRuntime runtime)
+        {
+            _runtime = runtime;
         }
 
         /// <summary>
@@ -94,14 +97,14 @@ namespace Nabuki
             logger.Initialize();
             Ended = false;
 
-            string textData = string.Empty;
+            var textData = string.Empty;
             yield return source.GetDialogueAsync(filePath, result => { textData = result; });
-
+            _runtime.Parse(textData);
+            
             var before = OnBeforePlay();
             while (before.MoveNext())
                 yield return before.Current;
-
-            _dialogue = _parser.Parse(textData);
+            
             yield return ExecuteDialogue();
 
             var after = OnAfterPlay();
@@ -120,7 +123,7 @@ namespace Nabuki
         /// Triggered right before the dialogue execution.
         /// </summary>
         /// <returns></returns>
-        public virtual IEnumerator OnBeforePlay()
+        protected virtual IEnumerator OnBeforePlay()
         {
             yield break;
         }
@@ -138,22 +141,13 @@ namespace Nabuki
         /// Executes the dialogue. Dialogue should be parsed before calling this.
         /// </summary>
         /// <returns></returns>
-        protected IEnumerator ExecuteDialogue()
+        private IEnumerator ExecuteDialogue()
         {
-            foreach (var data in _dialogue)
+            foreach (var data in _runtime)
             {
                 if (data.Accept(this))
                     yield return data.Execute(this);
             }
-        }
-
-        /// <summary>
-        /// Manually sets the phase of current dialogue.
-        /// </summary>
-        /// <param name="phase"></param>
-        public void SetPhase(int phase)
-        {
-            _dialogue.CurrentPhase = phase;
         }
 
         /// <summary>
