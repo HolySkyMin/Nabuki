@@ -10,6 +10,7 @@ namespace Nabuki.Inko
         private InkoParser _parser;
         private Story _inkStory;
         private string _entryPath;
+        private List<IDialogueData> _globalTags;
         
         public InkoRuntime(DialogueManager manager, string entryPath)
         {
@@ -21,6 +22,7 @@ namespace Nabuki.Inko
         {
             // Assume script is Ink-JSON file.
             _inkStory = new Story(script);
+            _globalTags = _parser.ParseGlobalTag(_inkStory);
             _inkStory.ChoosePathString(_entryPath);
         }
 
@@ -38,6 +40,9 @@ namespace Nabuki.Inko
         
         public IEnumerator<IDialogueData> GetEnumerator()
         {
+            foreach (var data in _globalTags)
+                yield return data;
+            
             while (true)
             {
                 var list = _parser.ParseNextLine(ref _inkStory);

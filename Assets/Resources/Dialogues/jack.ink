@@ -1,20 +1,23 @@
+# Character: banya/Banya, monster/Bear
+# Animate-Time: 0.3
+
 === Episode0 ===
 
-
-이얏! #speaker:banya #portrait:normal #position:0.5
-쿠어억! #speaker:monster #portrait:normal #position:0.5
-다음! #speaker:banya #portrait:happy #position:0.5
-바냐! 옆! #speaker:player
-? #speaker:banya #portrait:happy #position:0.5
-크르르릉... #speaker:monster #portrait:group #position:0.5
-포위됐어! 위험해! #speaker:player
-칫. 귀찮게. #speaker:banya #portrait:normal #position:0.5
-이 정도는...! #speaker:banya #portrait:normal #position:0.5
-크릉! #speaker:monster #portrait:normal #position:0.5
-퍽.
-큭! #speaker:banya #portrait:normal #position:0.5
-이대로 가면 위험해! #speaker:player
-어쩔 수 없지. 괴물들의 주의를 돌려 바냐를 구하자! #speaker:player
+# Set-Character: banya/normal/0.5, monster/normal/0.5
+banya: 이얏! # Fadein: banya
+monster: 쿠어억! # Fadeout: banya # Fadein: monster
+banya: 다음! # Fadeout: monster # Fadein: banya
+player: 바냐! 옆!
+banya: ?
+monster: 크르르릉... # Fadeout: banya # Fadein: monster/group
+player: 포위됐어! 위험해!
+banya: 칫. 귀찮게. # Fadeout: monster # Fadein: banya
+banya: 이 정도는...!
+monster: 크릉! # Fadeout: banya # Fadein: monster/normal
+퍽!
+banya: 큭! # Fadeout: monster # Fadein: banya
+player: 이대로 가면 위험해!
+player: 어쩔 수 없지. 괴물들의 주의를 돌려 바냐를 구하자!
 
 -> DONE
 
