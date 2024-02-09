@@ -28,7 +28,7 @@ jobs:
 
       - name: Create version tag
         run:  |
-          PKG_VERSION=$(python -c "import json;print json.loads(open('Assets/Nabuki/package.json', 'r').read())['version']")
+          PKG_VERSION=$(python -c "import json;print(json.loads(open('Assets/Nabuki/package.json', 'r').read())['version'])")
           git ls-remote --exit-code --tags origin $PKG_VERSION && echo "Same version already exists '$PKG_VERSION'" && exit 7
           git tag $PKG_VERSION upm
                 
