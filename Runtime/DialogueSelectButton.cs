@@ -10,17 +10,17 @@ namespace Nabuki
         public TMP_Text text;
         public DialogueSelector selector;
 
-        int index;
+        private int _index;
 
         public void Set(int i, string t)
         {
-            index = i;
+            _index = i;
             text.text = t;
         }
 
         public void Clicked()
         {
-            selector.result = index;
+            selector.result = _index;
             selector.hasResult = true;
         }
     }

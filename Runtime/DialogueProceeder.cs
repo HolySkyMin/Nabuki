@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace Nabuki
 {
-    public class DialogueProceeder : MonoBehaviour, IPointerDownHandler
+    public class DialogueProceeder : MonoBehaviour
     {
         public bool AllowInput
         {
@@ -21,7 +21,7 @@ namespace Nabuki
 
         bool _allowInput, _hasInput;
 
-        public void OnPointerDown(PointerEventData eventData)
+        public void Proceed()
         {
             if (_allowInput)
                 _hasInput = true;

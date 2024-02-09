@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if NAUGHTY_ATTRIBUTE_EXISTS
+using NaughtyAttributes;
+#endif
 
 namespace Nabuki
 {
@@ -13,8 +16,12 @@ namespace Nabuki
         [SerializeField] DialogueManager manager;
         [SerializeField] float width, height;
         [SerializeField] bool useSlot;
-        [SerializeField, NaughtyAttributes.ShowIf("useSlot")] List<Vector2> slots;
-
+#if NAUGHTY_ATTRIBUTE_EXISTS
+        [SerializeField, ShowIf("useSlot")] List<Vector2> slots;
+#else
+        [SerializeField] List<Vector2> slots;
+#endif
+        
         Dictionary<int, string> resident = new Dictionary<int, string>();
 
         public Vector3 GetPosition(Vector2 scalePos)

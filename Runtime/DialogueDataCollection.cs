@@ -42,6 +42,11 @@ namespace Nabuki
             data[phase].Add(dialogue);
         }
 
+        public IDialogueData GetNext()
+        {
+            return ++_currentIndex < data[_currentPhase].Count ? data[_currentPhase][_currentIndex] : null;
+        }
+
         public IEnumerator<IDialogueData> GetEnumerator()
         {
             while (++_currentIndex < data[_currentPhase].Count)
