@@ -7,16 +7,7 @@ namespace Nabuki.Inko
 {
     public class InkoParser
     {
-        private DialogueManager _manager;
-        private List<string> _existingCharacters;
-
         private float _animateTime;
-        
-        public InkoParser(DialogueManager manager)
-        {
-            _manager = manager;
-            _existingCharacters = new List<string>();
-        }
 
         public List<IDialogueData> ParseGlobalTag(Story story)
         {
@@ -53,18 +44,24 @@ namespace Nabuki.Inko
         public List<IDialogueData> ParseNextLine(ref Story story)
         {
             var commandList = new List<IDialogueData>();
-            var targetCharacter = string.Empty;
             
             // First we check whether story can be continued or not.
             if (story.canContinue)
             {
                 // Get main text by continuing.
                 var line = new InkoToken(story.Continue(), false);
+                string talker = string.Empty, talkerSprite = string.Empty;
+                if (!string.IsNullOrEmpty(line.Key))
+                {
+                    var keySplit = line.Key.Split('/');
+                    talker = keySplit[0].Trim();
+                    if (keySplit.Length > 1)
+                        talkerSprite = keySplit[1].Trim();
+                }
                 var dialogueData = StandardDialogueData.CreateDialogue(
-                    line.Values.Count > 0 ? line.Key : string.Empty,
-                    line.Values.Count > 0 ? line.Values[0] : line.Key,
+                    line.Values.Count > 0 ? talker : string.Empty,
+                    line.Values.Count > 0 ? line.Values[0] : talker,
                     string.Empty);
-                targetCharacter = line.Values.Count > 0 ? line.Key : string.Empty;
                 
                 // Next, parse tags for next line.
                 foreach (var tag in story.currentTags)
@@ -78,6 +75,18 @@ namespace Nabuki.Inko
                             _animateTime = float.Parse(parsedTag.Values[0]);
                             break;
                         // ============ CHARACTER and CHARACTER ANIMATION
+                        case "character":
+                            foreach (var value in parsedTag.Values)
+                            {
+                                var param = value.Split('/');
+                                commandList.Add(new StandardDialogueData.Character
+                                {
+                                    command = StandardDialogueData.CharacterCommand.Add,
+                                    characterKey = param[0],
+                                    characterName = param.Length > 1 ? param[1] : param[0]
+                                });
+                            }
+                            break;
                         case "set-character": case "set_character": case "set character":
                             foreach (var value in parsedTag.Values)
                             {
@@ -152,16 +161,12 @@ namespace Nabuki.Inko
                                 });
                             }
                             break;
-                        case "portrait": case "sprite":
-                            if (string.IsNullOrEmpty(targetCharacter) || targetCharacter == "player")
-                                break;
-                            
-                            // # Portrait: Angry
-                            commandList.Add(new StandardDialogueData.CharacterAnimation
+                        case "sprite":
+                            foreach (var value in parsedTag.Values)
                             {
-                                command = StandardDialogueData.CharacterCommand.SetSprite,
-                                characterKey = targetCharacter, spriteKey = parsedTag.Values[0]
-                            });
+                                var param = value.Split('/');
+                                commandList.Add(SetCharacterSprite(param[0], param[1]));
+                            }
                             break;
                         // ============ SCENE and UI TRANSITION
                         case "scenefadein": case "fadein-scene": case "fadein_scene": case "fadein scene":
@@ -264,6 +269,9 @@ namespace Nabuki.Inko
                     }
                 }
                 
+                // Process talker's sprite change after all other tags.
+                if (!string.IsNullOrEmpty(talkerSprite))
+                    commandList.Add(SetCharacterSprite(talker, talkerSprite));
                 commandList.Add(dialogueData);
             }
             else if (story.currentChoices.Count > 0)

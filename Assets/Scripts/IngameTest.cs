@@ -14,7 +14,7 @@ public class IngameTest : MonoBehaviour
     // Start is called before the first frame update
     IEnumerator Start()
     {
-        manager.SetRuntime(new InkoRuntime(manager, dialogEntryPoint));
+        manager.SetRuntime(new InkoRuntime(dialogEntryPoint));
         manager.SetAudio(stdAudio);
         manager.SetVariableData(new NbkData() { playerName = "플레이어" });
         manager.Play(dialogToPlay);

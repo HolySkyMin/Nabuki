@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 #if NAUGHTY_ATTRIBUTE_EXISTS
 using NaughtyAttributes;
@@ -37,6 +36,11 @@ namespace Nabuki
         /// Indicates whether the dialogue has ended.
         /// </summary>
         public bool Ended { get; private set; }
+
+        /// <summary>
+        /// Indicates whether the dialogue has been skipped.
+        /// </summary>
+        public bool Skipped { get; private set; }
 
         /// <summary>
         /// Current keyword of player. This is used only when no characters are designated as player.
@@ -96,6 +100,7 @@ namespace Nabuki
             displayer.Initialize();
             logger.Initialize();
             Ended = false;
+            Skipped = false;
 
             var textData = string.Empty;
             yield return source.GetDialogueAsync(filePath, result => { textData = result; });
@@ -148,6 +153,13 @@ namespace Nabuki
                 if (data.Accept(this))
                     yield return data.Execute(this);
             }
+        }
+
+        public void Skip()
+        {
+            StopAllCoroutines();
+            Skipped = true;
+            Ended = true;
         }
 
         /// <summary>

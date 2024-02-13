@@ -12,9 +12,9 @@ namespace Nabuki.Inko
         private string _entryPath;
         private List<IDialogueData> _globalTags;
         
-        public InkoRuntime(DialogueManager manager, string entryPath)
+        public InkoRuntime(string entryPath)
         {
-            _parser = new InkoParser(manager);
+            _parser = new InkoParser();
             _entryPath = entryPath;
         }
 
