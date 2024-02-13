@@ -1,0 +1,25 @@
+{
+    "name": "Nabuki.Inko",
+    "rootNamespace": "Nabuki.Inko",
+    "references": [
+        "GUID:b50f929d05f48bb4a906acc196368972",
+        "GUID:58bed0e7c5306824586d7eda03609289"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "INK_EXISTS"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.inkle.ink-unity-integration",
+            "expression": "1.0.0",
+            "define": "INK_EXISTS"
+        }
+    ],
+    "noEngineReferences": false
+}

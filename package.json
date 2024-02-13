@@ -1,0 +1,13 @@
+{
+    "name": "com.holyskymin.nabuki",
+    "displayName": "Nabuki",
+    "version": "0.12.0",
+    "unity": "2022.1",
+    "description": "Simple 2D dialogue library for Unity.\n\nNever forget the Parallel Universe.",
+    "dependencies": {
+        "com.unity.textmeshpro": "2.0.1"
+    },
+    "author": {
+        "name": "HolySkyMin"
+    }
+}
