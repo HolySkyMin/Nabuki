@@ -87,6 +87,28 @@ namespace Nabuki.Inko
                                 });
                             }
                             break;
+                        case "replace-name": case "replace_name": case "replace name":
+                            foreach (var value in parsedTag.Values)
+                            {
+                                var param = value.Split('/');
+                                commandList.Add(new StandardDialogueData.Character
+                                {
+                                    command = StandardDialogueData.CharacterCommand.HideName,
+                                    characterKey = param[0],
+                                    characterName = param[1]
+                                });
+                            }
+                            break;
+                        case "restore-name": case "restore_name": case "restore name":
+                            foreach (var value in parsedTag.Values)
+                            {
+                                commandList.Add(new StandardDialogueData.Character
+                                {
+                                    command = StandardDialogueData.CharacterCommand.ShowName,
+                                    characterKey = value
+                                });
+                            }
+                            break;
                         case "set-character": case "set_character": case "set character":
                             foreach (var value in parsedTag.Values)
                             {
@@ -157,6 +179,28 @@ namespace Nabuki.Inko
                                 {
                                     command = StandardDialogueData.CharacterCommand.FadeOut,
                                     characterKey = parsedTag.Values[i], duration = _animateTime,
+                                    shouldWait = i == parsedTag.Values.Count - 1
+                                });
+                            }
+                            break;
+                        case "nodup": case "nod-up": case "nod_up": case "nod up":
+                            for (int i = 0; i < parsedTag.Values.Count; i++)
+                            {
+                                commandList.Add(new StandardDialogueData.CharacterAnimation
+                                {
+                                    command = StandardDialogueData.CharacterCommand.NodUp,
+                                    characterKey = parsedTag.Values[i],
+                                    shouldWait = i == parsedTag.Values.Count - 1
+                                });
+                            }
+                            break;
+                        case "noddown": case "nod-down": case "nod_down": case "nod down":
+                            for (int i = 0; i < parsedTag.Values.Count; i++)
+                            {
+                                commandList.Add(new StandardDialogueData.CharacterAnimation
+                                {
+                                    command = StandardDialogueData.CharacterCommand.NodDown,
+                                    characterKey = parsedTag.Values[i],
                                     shouldWait = i == parsedTag.Values.Count - 1
                                 });
                             }
